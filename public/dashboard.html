@@ -88,6 +88,7 @@
             transition: var(--transition);
             flex-wrap: wrap;
             gap: 1rem;
+            width: 100%;
         }
 
         .dashboard-nav .nav-left {
@@ -503,7 +504,7 @@
     </style>
 </head>
 <body>
-    <nav class="dashboard-nav">
+    <nav class="dashboard-nav" id="dashboardNav">
         <div class="nav-left">
             <button class="hamburger" id="hamburger" aria-label="Toggle menu">
                 <span></span>
@@ -643,33 +644,6 @@
                 </div>
             </div>
 
-            <!-- Timeline Management -->
-            <div class="dashboard-card">
-                <h3>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <polyline points="12 6 12 12 16 14"/>
-                    </svg>
-                    <span data-i18n="dashboard.timelineManagement">Timeline Management</span>
-                </h3>
-                <form id="timelineForm">
-                    <div class="form-group">
-                        <label data-i18n="dashboard.timelineTitle">Title</label>
-                        <input type="text" id="timelineTitle" data-i18n-placeholder="dashboard.timelineTitlePlaceholder" placeholder="e.g., 10:00 AM - Arrival" required>
-                    </div>
-                    <div class="form-group">
-                        <label data-i18n="dashboard.timelineDesc">Description</label>
-                        <input type="text" id="timelineDesc" data-i18n-placeholder="dashboard.timelineDescPlaceholder" placeholder="Brief description">
-                    </div>
-                    <button type="submit" class="btn btn-primary" data-i18n="dashboard.addTimeline">Add Timeline Item</button>
-                </form>
-                <div style="margin-top: 1rem;">
-                    <h4 style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.5rem; transition: var(--transition);" data-i18n="dashboard.currentTimeline">Current Timeline</h4>
-                    <div class="item-list" id="timelineList">
-                    </div>
-                </div>
-            </div>
-
             <!-- Gallery Management -->
             <div class="dashboard-card">
                 <h3>
@@ -800,13 +774,6 @@
                 'dashboard.title': 'Welcome to Baptism Blessing Dashboard',
                 'dashboard.subtitle': 'Manage your invitation website content',
                 'dashboard.general': 'General Information',
-                'dashboard.timelineManagement': 'Timeline Management',
-                'dashboard.timelineTitle': 'Title',
-                'dashboard.timelineTitlePlaceholder': 'e.g., 10:00 AM - Arrival',
-                'dashboard.timelineDesc': 'Description',
-                'dashboard.timelineDescPlaceholder': 'Brief description',
-                'dashboard.addTimeline': 'Add Timeline Item',
-                'dashboard.currentTimeline': 'Current Timeline',
                 'dashboard.galleryManagement': 'Gallery Management',
                 'dashboard.uploadImage': 'Upload Image',
                 'dashboard.chooseImage': 'Choose Image',
@@ -836,13 +803,6 @@
                 'dashboard.title': 'مرحباً بكم في لوحة تحكم معمودية البركة',
                 'dashboard.subtitle': 'إدارة محتوى موقع دعوتكم',
                 'dashboard.general': 'المعلومات العامة',
-                'dashboard.timelineManagement': 'إدارة الجدول الزمني',
-                'dashboard.timelineTitle': 'العنوان',
-                'dashboard.timelineTitlePlaceholder': 'مثل: ١٠:٠٠ ص - الوصول',
-                'dashboard.timelineDesc': 'الوصف',
-                'dashboard.timelineDescPlaceholder': 'وصف مختصر',
-                'dashboard.addTimeline': 'إضافة عنصر للجدول الزمني',
-                'dashboard.currentTimeline': 'الجدول الزمني الحالي',
                 'dashboard.galleryManagement': 'إدارة المعرض',
                 'dashboard.uploadImage': 'رفع صورة',
                 'dashboard.chooseImage': 'اختر صورة',
@@ -953,6 +913,22 @@
 
         // Language tabs for General Information
         document.querySelectorAll('.lang-tab[data-lang]').forEach(tab => {
+            tab.addEventListener('click', function() {
+                const lang = this.dataset.lang;
+                const parent = this.closest('.dashboard-card');
+                
+                // Remove active from all tabs in this card
+                parent.querySelectorAll('.lang-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Show corresponding content
+                parent.querySelectorAll('.lang-content').forEach(c => c.classList.remove('active'));
+                parent.querySelector(`#${lang}`).classList.add('active');
+            });
+        });
+
+        // Language tabs for Message
+        document.querySelectorAll('.lang-tab[data-lang^="msg-"]').forEach(tab => {
             tab.addEventListener('click', function() {
                 const lang = this.dataset.lang;
                 const parent = this.closest('.dashboard-card');
@@ -1215,95 +1191,6 @@
                 }
             } catch (error) {
                 showStatus('خطأ في الشبكة. يرجى المحاولة مرة أخرى.', 'error');
-            }
-        });
-
-        // Load timeline
-        async function loadTimeline() {
-            try {
-                const response = await fetch('/api/timeline', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                    },
-                });
-                if (response.ok) {
-                    const items = await response.json();
-                    const list = document.getElementById('timelineList');
-                    list.innerHTML = '';
-                    const deleteLabel = currentLang === 'ar' ? 'حذف' : 'Delete';
-                    if (items && items.length > 0) {
-                        items.forEach(item => {
-                            const div = document.createElement('div');
-                            div.className = 'item';
-                            div.innerHTML = `
-                                <div>
-                                    <strong>${item.title}</strong>
-                                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0; transition: var(--transition);">${item.description || ''}</p>
-                                </div>
-                                <div class="item-actions">
-                                    <button class="btn btn-danger btn-sm delete-timeline" data-id="${item.id}">${deleteLabel}</button>
-                                </div>
-                            `;
-                            list.appendChild(div);
-                        });
-                        document.querySelectorAll('.delete-timeline').forEach(btn => {
-                            btn.addEventListener('click', async function() {
-                                const id = this.dataset.id;
-                                const confirmMsg = currentLang === 'ar' ? 'حذف هذا العنصر من الجدول الزمني؟' : 'Delete this timeline item?';
-                                if (confirm(confirmMsg)) {
-                                    try {
-                                        const response = await fetch(`/api/timeline/${id}`, {
-                                            method: 'DELETE',
-                                            headers: {
-                                                'Authorization': `Bearer ${token}`,
-                                            },
-                                        });
-                                        if (response.ok) {
-                                            showStatus(currentLang === 'ar' ? 'تم حذف عنصر الجدول الزمني.' : 'Timeline item deleted.');
-                                            loadTimeline();
-                                        }
-                                    } catch (error) {
-                                        showStatus(currentLang === 'ar' ? 'خطأ في حذف عنصر الجدول الزمني.' : 'Error deleting timeline item.', 'error');
-                                    }
-                                }
-                            });
-                        });
-                    } else {
-                        list.innerHTML = `<div style="text-align: center; padding: 1rem; color: var(--text-secondary);">${currentLang === 'ar' ? 'لا توجد عناصر في الجدول الزمني' : 'No timeline items'}</div>`;
-                    }
-                }
-            } catch (error) {
-                console.error('Error loading timeline:', error);
-            }
-        }
-
-        loadTimeline();
-
-        // Add timeline item
-        document.getElementById('timelineForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const title = document.getElementById('timelineTitle').value;
-            const description = document.getElementById('timelineDesc').value;
-
-            try {
-                const response = await fetch('/api/timeline', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`,
-                    },
-                    body: JSON.stringify({ title, description }),
-                });
-                if (response.ok) {
-                    showStatus(currentLang === 'ar' ? 'تم إضافة عنصر الجدول الزمني!' : 'Timeline item added!');
-                    document.getElementById('timelineTitle').value = '';
-                    document.getElementById('timelineDesc').value = '';
-                    loadTimeline();
-                } else {
-                    showStatus(currentLang === 'ar' ? 'فشل في إضافة عنصر الجدول الزمني.' : 'Failed to add timeline item.', 'error');
-                }
-            } catch (error) {
-                showStatus(currentLang === 'ar' ? 'خطأ في الشبكة. يرجى المحاولة مرة أخرى.' : 'Network error. Please try again.', 'error');
             }
         });
 
