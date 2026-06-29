@@ -244,7 +244,7 @@ app.post('/api/login', [
         });
       }
       
-      return res.status(401).json({ message: 'Invalid username or password' });
+      return res.status(401).json({ message: 'اسم المستخدم أو كلمة المرور غير صحيحة' });
     }
 
     // Verify password
@@ -293,8 +293,8 @@ app.post('/api/save-default', async (req, res) => {
       babyNameAr: 'ميكال مينا',
       parentsNamesAr: 'مينا ومريم',
       churchAr: 'دير الأنبا بيشوي',
-      dateAr: 'السبت، ٤ يوليو ٢٠٢٦',
-      timeAr: '٦:٠٠ صباحاً',
+      dateAr: 'السبت، 4 يوليو 2026',
+      timeAr: '6:00 صباحاً',
       receptionAr: 'طريق دير الأنبا بيشوي، وادي النطرون',
       mapLinkAr: 'https://maps.app.goo.gl/a6TVWifecD19cr9s9',
       parentsMessageAr: '"يسعدنا ويشرفنا حضوركم للاحتفال بسر المعمودية المقدسة لطفلتنا الغالية ميكال مينا"'
