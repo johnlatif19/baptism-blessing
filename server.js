@@ -81,7 +81,7 @@ app.use(helmet({
 // CORS
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://baptism-blessing.vercel.app', 'https://your-domain.com']
+    ? ['https://baptism-blessing.vercel.app']
     : ['http://localhost:3000', 'http://localhost:5500', 'http://127.0.0.1:5500'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -146,71 +146,6 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
-// ==================== DATABASE INITIALIZATION ====================
-
-// Initialize default data if not exists
-async function initializeDatabase() {
-  try {
-    // Check if event settings exist
-    const eventDoc = await db.collection('settings').doc('event').get();
-    if (!eventDoc.exists) {
-      await db.collection('settings').doc('event').set({
-        babyName: 'Amelia Grace',
-        parentsNames: 'Michael & Sarah',
-        church: 'St. Mary & St. Mina Coptic Orthodox Church',
-        date: 'June 29, 2026',
-        time: '10:00 AM',
-        reception: "St. Mark's Fellowship Hall",
-        mapLink: 'https://maps.google.com/maps?q=St+Mary+%26+St+Mina+Coptic+Orthodox+Church',
-        parentsMessage: '"We give thanks to God for the gift of our precious daughter. Her baptism is a celebration of God\'s love and faithfulness to our family. We are blessed beyond measure."',
-        createdAt: admin.firestore.FieldValue.serverTimestamp()
-      });
-      console.log('✅ Default event data created');
-    }
-
-    // Check if default timeline items exist
-    const timelineSnapshot = await db.collection('timeline').get();
-    if (timelineSnapshot.empty) {
-      const defaultTimeline = [
-        { title: '10:00 AM - Arrival', description: 'Guests arrival and seating', order: 0 },
-        { title: '10:15 AM - Prayer', description: 'Opening prayer and hymns', order: 1 },
-        { title: '10:30 AM - Holy Baptism', description: 'Sacrament of Holy Baptism', order: 2 },
-        { title: '11:15 AM - Photography', description: 'Family photos and memories', order: 3 },
-        { title: '11:45 AM - Reception', description: 'Celebration and fellowship', order: 4 }
-      ];
-
-      for (const item of defaultTimeline) {
-        await db.collection('timeline').add({
-          ...item,
-          createdAt: admin.firestore.FieldValue.serverTimestamp()
-        });
-      }
-      console.log('✅ Default timeline data created');
-    }
-
-    // Create admin user if not exists
-    const userSnapshot = await db.collection('users')
-      .where('username', '==', ADMIN_USERNAME)
-      .limit(1)
-      .get();
-
-    if (userSnapshot.empty) {
-      const hashedPassword = await bcrypt.hash(ADMIN_PASSWORD, 10);
-      await db.collection('users').add({
-        username: ADMIN_USERNAME,
-        password: hashedPassword,
-        role: 'admin',
-        createdAt: admin.firestore.FieldValue.serverTimestamp()
-      });
-      console.log('✅ Admin user created');
-    }
-
-    console.log('✅ Database initialized successfully');
-  } catch (error) {
-    console.error('❌ Error initializing database:', error);
-  }
-}
-
 // ==================== AUTHENTICATION MIDDLEWARE ====================
 
 const authenticateToken = (req, res, next) => {
@@ -273,9 +208,8 @@ app.post('/api/login', [
       userData = userSnapshot.docs[0].data();
     }
 
-    // If no user found, check hardcoded admin from .env (for backwards compatibility)
+    // If no user found, check hardcoded admin from .env
     if (!userData) {
-      // Check against .env admin credentials
       if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
         // Create admin user in database if not exists
         const adminCheck = await db.collection('users')
@@ -346,22 +280,12 @@ app.get('/api/event', async (req, res) => {
     const doc = await db.collection('settings').doc('event').get();
     if (doc.exists) {
       const data = doc.data();
-      // Remove server timestamp from response
       delete data.createdAt;
       delete data.updatedAt;
       res.json(data);
     } else {
-      // Return default event data
-      res.json({
-        babyName: 'Amelia Grace',
-        parentsNames: 'Michael & Sarah',
-        church: 'St. Mary & St. Mina Coptic Orthodox Church',
-        date: 'June 29, 2026',
-        time: '10:00 AM',
-        reception: "St. Mark's Fellowship Hall",
-        mapLink: 'https://maps.google.com/maps?q=St+Mary+%26+St+Mina+Coptic+Orthodox+Church',
-        parentsMessage: '"We give thanks to God for the gift of our precious daughter. Her baptism is a celebration of God\'s love and faithfulness to our family. We are blessed beyond measure."'
-      });
+      // Return empty object if no data exists
+      res.json({});
     }
   } catch (error) {
     console.error('Error fetching event:', error);
@@ -414,7 +338,6 @@ app.get('/api/gallery', async (req, res) => {
       images.push({ 
         id: doc.id, 
         ...data,
-        // Remove server timestamp from response
         createdAt: data.createdAt ? data.createdAt.toDate().toISOString() : null
       });
     });
@@ -432,7 +355,6 @@ app.post('/api/gallery', authenticateToken, upload.single('image'), async (req, 
   }
 
   try {
-    // Upload to Cloudinary
     const result = await new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
@@ -450,7 +372,6 @@ app.post('/api/gallery', authenticateToken, upload.single('image'), async (req, 
       uploadStream.end(req.file.buffer);
     });
 
-    // Save to Firestore
     const imageData = {
       url: result.secure_url,
       publicId: result.public_id,
@@ -477,7 +398,6 @@ app.delete('/api/gallery/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
 
   try {
-    // Get image data to delete from Cloudinary
     const doc = await db.collection('gallery').doc(id).get();
     if (!doc.exists) {
       return res.status(404).json({ message: 'Image not found' });
@@ -485,12 +405,10 @@ app.delete('/api/gallery/:id', authenticateToken, async (req, res) => {
 
     const imageData = doc.data();
     
-    // Delete from Cloudinary
     if (imageData.publicId) {
       await cloudinary.uploader.destroy(imageData.publicId);
     }
 
-    // Delete from Firestore
     await db.collection('gallery').doc(id).delete();
     res.json({ message: 'Image deleted successfully' });
   } catch (error) {
@@ -609,7 +527,6 @@ app.post('/api/timeline', authenticateToken, [
   }
 
   try {
-    // Get current count for order
     const snapshot = await db.collection('timeline').get();
     const order = snapshot.size;
 
@@ -697,21 +614,27 @@ app.get('/dashboard', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
+// Serve photo.html for /gallery
+app.get('/gallery', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'gallery.html'));
+});
+
+// Serve video.html for /videos
+app.get('/videos', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'videos.html'));
+});
+
 // ==================== FALLBACK ROUTE ====================
 
-// Serve index.html for all other routes (SPA support)
 app.get('*', (req, res) => {
-  // Don't serve index.html for API routes
   if (req.path.startsWith('/api/')) {
     return res.status(404).json({ message: 'API endpoint not found' });
   }
-  // Redirect to root for any other routes
   res.redirect('/');
 });
 
 // ==================== ERROR HANDLING ====================
 
-// 404 handler
 app.use((req, res, next) => {
   if (req.path.startsWith('/api/')) {
     res.status(404).json({ message: 'API endpoint not found' });
@@ -720,11 +643,9 @@ app.use((req, res, next) => {
   }
 });
 
-// Global error handler
 app.use((err, req, res, next) => {
   console.error('Server Error:', err);
   
-  // Multer error handling
   if (err instanceof multer.MulterError) {
     if (err.code === 'FILE_TOO_LARGE') {
       return res.status(413).json({ message: 'File too large. Maximum size is 10MB' });
@@ -732,7 +653,6 @@ app.use((err, req, res, next) => {
     return res.status(400).json({ message: err.message });
   }
 
-  // JWT error handling
   if (err.name === 'JsonWebTokenError') {
     return res.status(403).json({ message: 'Invalid token' });
   }
@@ -741,7 +661,6 @@ app.use((err, req, res, next) => {
     return res.status(403).json({ message: 'Token expired' });
   }
 
-  // Default error
   res.status(500).json({ 
     message: 'Internal server error',
     error: process.env.NODE_ENV === 'development' ? err.message : undefined
@@ -750,30 +669,30 @@ app.use((err, req, res, next) => {
 
 // ==================== START SERVER ====================
 
-// Initialize database before starting server
-initializeDatabase().then(() => {
-  app.listen(PORT, () => {
-    console.log('=================================');
-    console.log('🕊️  Baptism Blessing Server');
-    console.log('=================================');
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
-    console.log(`📱 Environment: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`🔐 JWT: ${JWT_SECRET ? 'Configured ✅' : 'Missing ❌'}`);
-    console.log(`☁️  Cloudinary: ${process.env.CLOUDINARY_CLOUD_NAME ? 'Configured ✅' : 'Missing ❌'}`);
-    console.log(`🔥 Firebase: ${firebaseConfig.project_id ? 'Configured ✅' : 'Missing ❌'}`);
-    console.log('=================================');
-    console.log('📋 Admin Credentials from .env:');
-    console.log(`   Username: ${ADMIN_USERNAME}`);
-    console.log(`   Password: ${ADMIN_PASSWORD}`);
-    console.log('=================================');
-    console.log('🌐 Clean URLs:');
-    console.log(`   Home: http://localhost:${PORT}/`);
-    console.log(`   Login: http://localhost:${PORT}/login`);
-    console.log(`   Dashboard: http://localhost:${PORT}/dashboard`);
-    console.log('=================================');
-  });
+app.listen(PORT, () => {
+  console.log('=================================');
+  console.log('🕊️  Baptism Blessing Server');
+  console.log('=================================');
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`📱 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🔐 JWT: ${JWT_SECRET ? 'Configured ✅' : 'Missing ❌'}`);
+  console.log(`☁️  Cloudinary: ${process.env.CLOUDINARY_CLOUD_NAME ? 'Configured ✅' : 'Missing ❌'}`);
+  console.log(`🔥 Firebase: ${firebaseConfig.project_id ? 'Configured ✅' : 'Missing ❌'}`);
+  console.log('=================================');
+  console.log('📋 Admin Credentials from .env:');
+  console.log(`   Username: ${ADMIN_USERNAME}`);
+  console.log(`   Password: ${ADMIN_PASSWORD}`);
+  console.log('=================================');
+  console.log('🌐 Clean URLs:');
+  console.log(`   Home: http://localhost:${PORT}/`);
+  console.log(`   Login: http://localhost:${PORT}/login`);
+  console.log(`   Dashboard: http://localhost:${PORT}/dashboard`);
+  console.log(`   Gallery: http://localhost:${PORT}/gallery`);
+  console.log(`   Videos: http://localhost:${PORT}/videos`);
+  console.log('=================================');
+  console.log('⚠️  No default data will be created in Firestore');
+  console.log('📝 All data must be added manually through the dashboard');
+  console.log('=================================');
 });
-
-// ==================== EXPORT FOR TESTING ====================
 
 module.exports = app;
