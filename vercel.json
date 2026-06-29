@@ -25,6 +25,14 @@
       "dest": "/public/dashboard.html"
     },
     {
+      "src": "/photo",
+      "dest": "/public/photo.html"
+    },
+    {
+      "src": "/video",
+      "dest": "/public/video.html"
+    },
+    {
       "src": "/",
       "dest": "/public/index.html"
     },
