@@ -500,7 +500,7 @@
                     if (rememberMe) {
                         localStorage.setItem('rememberMe', 'true');
                     }
-                    window.location.href = '/dashboard.html';
+                    window.location.href = '/dashboard';
                 } else {
                     errorDiv.textContent = data.message || (currentLang === 'ar' ? 'اسم المستخدم أو كلمة المرور غير صحيحة.' : 'Invalid username or password.');
                     errorDiv.classList.add('show');
@@ -520,7 +520,7 @@
                 },
             }).then(response => {
                 if (response.ok) {
-                    window.location.href = '/dashboard.html';
+                    window.location.href = '/dashboard';
                 }
             }).catch(() => {});
         }
