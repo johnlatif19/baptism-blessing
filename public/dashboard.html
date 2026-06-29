@@ -66,11 +66,6 @@
             --input-border: #3d2d22;
         }
 
-        html, body {
-            width: 100%;
-            overflow-x: hidden;
-        }
-
         body {
             font-family: 'Poppins', sans-serif;
             background: var(--bg-primary);
@@ -93,14 +88,12 @@
             transition: var(--transition);
             flex-wrap: wrap;
             gap: 1rem;
-            width: 100%;
         }
 
         .dashboard-nav .nav-left {
             display: flex;
             align-items: center;
             gap: 1.5rem;
-            flex-wrap: wrap;
         }
 
         .dashboard-nav .logo {
@@ -113,12 +106,11 @@
         .dashboard-nav .logo svg {
             width: 35px;
             height: 35px;
-            flex-shrink: 0;
         }
 
         .dashboard-nav .logo span {
             font-family: 'Playfair Display', serif;
-            font-size: clamp(1rem, 2vw, 1.2rem);
+            font-size: 1.2rem;
             font-weight: 700;
             background: linear-gradient(135deg, var(--gold-dark), var(--gold));
             -webkit-background-clip: text;
@@ -129,13 +121,13 @@
         .dashboard-nav .nav-right {
             display: flex;
             align-items: center;
-            gap: 0.8rem;
+            gap: 1rem;
             flex-wrap: wrap;
         }
 
         .dashboard-nav .nav-right .user-info {
             color: var(--text-secondary);
-            font-size: clamp(0.7rem, 1.2vw, 0.9rem);
+            font-size: 0.9rem;
             transition: var(--transition);
         }
 
@@ -145,14 +137,13 @@
             border-radius: 50px;
             padding: 0.4rem 0.8rem;
             cursor: pointer;
-            font-size: clamp(0.6rem, 1vw, 0.8rem);
+            font-size: 0.8rem;
             font-family: 'Poppins', sans-serif;
             color: var(--text-primary);
             transition: var(--transition);
             display: flex;
             align-items: center;
             gap: 0.4rem;
-            white-space: nowrap;
         }
 
         .theme-toggle:hover, .lang-toggle:hover {
@@ -164,11 +155,10 @@
         .theme-toggle svg, .lang-toggle svg {
             width: 16px;
             height: 16px;
-            flex-shrink: 0;
         }
 
         .logout-btn {
-            padding: 0.4rem 1.2rem;
+            padding: 0.5rem 1.5rem;
             background: transparent;
             border: 2px solid var(--gold);
             color: var(--gold-dark);
@@ -177,8 +167,6 @@
             font-weight: 600;
             cursor: pointer;
             transition: var(--transition);
-            font-size: clamp(0.7rem, 1vw, 0.9rem);
-            white-space: nowrap;
         }
 
         .logout-btn:hover {
@@ -187,20 +175,19 @@
         }
 
         .dashboard-main {
-            padding: 1.5rem 3%;
-            max-width: 1600px;
+            padding: 2rem 5% 4rem;
+            max-width: 1400px;
             margin: 0 auto;
             transition: var(--transition);
-            width: 100%;
         }
 
         .dashboard-header {
-            margin-bottom: 2rem;
+            margin-bottom: 2.5rem;
         }
 
         .dashboard-header h1 {
             font-family: 'Playfair Display', serif;
-            font-size: clamp(1.5rem, 3vw, 2.5rem);
+            font-size: 2rem;
             font-weight: 700;
             color: var(--text-primary);
             transition: var(--transition);
@@ -209,15 +196,14 @@
         .dashboard-header p {
             color: var(--text-secondary);
             font-family: 'Cormorant Garamond', serif;
-            font-size: clamp(1rem, 1.5vw, 1.2rem);
+            font-size: 1.1rem;
             transition: var(--transition);
         }
 
         .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-            width: 100%;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 2rem;
         }
 
         .dashboard-card {
@@ -227,8 +213,6 @@
             box-shadow: var(--shadow);
             border: 1px solid var(--border-color);
             transition: var(--transition);
-            width: 100%;
-            min-width: 0;
         }
 
         .dashboard-card:hover {
@@ -238,21 +222,19 @@
 
         .dashboard-card h3 {
             font-family: 'Playfair Display', serif;
-            font-size: clamp(1rem, 1.5vw, 1.2rem);
+            font-size: 1.2rem;
             color: var(--text-primary);
             margin-bottom: 1rem;
             display: flex;
             align-items: center;
             gap: 0.75rem;
             transition: var(--transition);
-            flex-wrap: wrap;
         }
 
         .dashboard-card h3 svg {
             width: 24px;
             height: 24px;
             color: var(--gold);
-            flex-shrink: 0;
         }
 
         .dashboard-card .form-group {
@@ -261,7 +243,7 @@
 
         .dashboard-card .form-group label {
             display: block;
-            font-size: clamp(0.7rem, 1vw, 0.8rem);
+            font-size: 0.8rem;
             font-weight: 600;
             color: var(--text-secondary);
             margin-bottom: 0.25rem;
@@ -272,15 +254,14 @@
         .dashboard-card .form-group textarea,
         .dashboard-card .form-group select {
             width: 100%;
-            padding: 0.6rem 0.8rem;
+            padding: 0.7rem 1rem;
             border: 2px solid var(--input-border);
             border-radius: 12px;
             font-family: 'Poppins', sans-serif;
-            font-size: clamp(0.8rem, 1vw, 0.9rem);
+            font-size: 0.9rem;
             transition: var(--transition);
             background: var(--input-bg);
             color: var(--text-primary);
-            min-width: 0;
         }
 
         .dashboard-card .form-group input:focus,
@@ -294,29 +275,6 @@
             resize: vertical;
         }
 
-        .dashboard-card .form-group input[type="file"] {
-            padding: 0.4rem;
-            border: 2px dashed var(--gold);
-            background: var(--bg-primary);
-            cursor: pointer;
-        }
-
-        .dashboard-card .form-group input[type="file"]::-webkit-file-upload-button {
-            padding: 0.4rem 1rem;
-            border: none;
-            border-radius: 50px;
-            background: var(--gold);
-            color: white;
-            font-family: 'Poppins', sans-serif;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .dashboard-card .form-group input[type="file"]::-webkit-file-upload-button:hover {
-            background: var(--gold-dark);
-        }
-
         .btn {
             padding: 0.6rem 1.5rem;
             border: none;
@@ -325,8 +283,6 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            font-size: clamp(0.8rem, 1vw, 0.9rem);
-            white-space: nowrap;
         }
 
         .btn-primary {
@@ -360,14 +316,30 @@
         }
 
         .btn-sm {
-            padding: 0.3rem 0.8rem;
-            font-size: clamp(0.6rem, 0.8vw, 0.75rem);
+            padding: 0.4rem 1rem;
+            font-size: 0.8rem;
         }
 
         .btn-group {
             display: flex;
             gap: 0.5rem;
             flex-wrap: wrap;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
         }
 
         .item-list {
@@ -381,10 +353,8 @@
             align-items: center;
             padding: 0.75rem 1rem;
             border-bottom: 1px solid var(--border-color);
-            font-size: clamp(0.75rem, 1vw, 0.9rem);
+            font-size: 0.9rem;
             transition: var(--transition);
-            flex-wrap: wrap;
-            gap: 0.5rem;
         }
 
         .item-list .item:last-child {
@@ -394,45 +364,15 @@
         .item-list .item-actions {
             display: flex;
             gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-
-        .item-list .item img {
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
-            border-radius: 8px;
-            flex-shrink: 0;
-        }
-
-        .item-list .item .item-info {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            flex: 1;
-            min-width: 150px;
-        }
-
-        .item-list .item .item-info .video-icon {
-            width: 50px;
-            height: 50px;
-            background: var(--gold);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            flex-shrink: 0;
         }
 
         .status-msg {
             padding: 0.75rem 1rem;
             border-radius: 12px;
             margin-bottom: 1rem;
-            font-size: clamp(0.8rem, 1vw, 0.9rem);
+            font-size: 0.9rem;
             display: none;
             transition: var(--transition);
-            width: 100%;
         }
 
         .status-msg.success {
@@ -479,37 +419,42 @@
             border-radius: 2px;
         }
 
-        .video-preview {
-            margin-top: 0.5rem;
-            width: 100%;
-            max-width: 100%;
+        .lang-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .lang-tab {
+            padding: 0.4rem 1.2rem;
+            border: none;
+            background: transparent;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            cursor: pointer;
             border-radius: 8px;
-            overflow: hidden;
+            transition: var(--transition);
         }
 
-        .video-preview video {
-            width: 100%;
-            max-height: 200px;
-            border-radius: 8px;
-            background: #000;
+        .lang-tab.active {
+            background: var(--gold);
+            color: white;
         }
 
-        .file-size-info {
-            font-size: clamp(0.6rem, 0.8vw, 0.75rem);
-            color: var(--text-gold);
-            margin-top: 0.25rem;
+        .lang-tab:hover:not(.active) {
+            background: var(--border-color);
         }
 
-        @media (max-width: 1200px) {
-            .dashboard-grid {
-                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            }
+        .lang-content {
+            display: none;
         }
 
-        @media (max-width: 992px) {
-            .dashboard-grid {
-                grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            }
+        .lang-content.active {
+            display: block;
         }
 
         @media (max-width: 768px) {
@@ -534,15 +479,7 @@
             }
 
             .dashboard-nav {
-                padding: 0.8rem 3%;
-            }
-
-            .dashboard-main {
-                padding: 1rem 3%;
-            }
-
-            .dashboard-card {
-                padding: 1rem;
+                flex-wrap: wrap;
             }
 
             .dashboard-nav .nav-right {
@@ -554,90 +491,6 @@
                 width: 100%;
                 justify-content: space-between;
             }
-
-            .item-list .item {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .item-list .item .item-info {
-                width: 100%;
-            }
-
-            .item-list .item-actions {
-                width: 100%;
-                justify-content: flex-end;
-            }
-
-            .btn-group {
-                flex-direction: column;
-                width: 100%;
-            }
-
-            .btn-group .btn {
-                width: 100%;
-                justify-content: center;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .dashboard-nav .logo span {
-                font-size: 0.9rem;
-            }
-
-            .dashboard-nav .logo svg {
-                width: 28px;
-                height: 28px;
-            }
-
-            .theme-toggle, .lang-toggle {
-                padding: 0.3rem 0.6rem;
-                font-size: 0.65rem;
-            }
-
-            .theme-toggle svg, .lang-toggle svg {
-                width: 14px;
-                height: 14px;
-            }
-
-            .logout-btn {
-                padding: 0.3rem 0.8rem;
-                font-size: 0.7rem;
-            }
-
-            .dashboard-card .form-group input,
-            .dashboard-card .form-group textarea {
-                padding: 0.5rem 0.6rem;
-                font-size: 0.8rem;
-            }
-
-            .btn {
-                padding: 0.5rem 1rem;
-                font-size: 0.75rem;
-            }
-
-            .item-list .item img {
-                width: 40px;
-                height: 40px;
-            }
-
-            .item-list .item .item-info .video-icon {
-                width: 40px;
-                height: 40px;
-                font-size: 1.2rem;
-            }
-        }
-
-        @media (min-width: 1400px) {
-            .dashboard-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-
-        @media (min-width: 1800px) {
-            .dashboard-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
         }
 
         [dir="rtl"] .item-list .item {
@@ -646,36 +499,6 @@
 
         [dir="rtl"] .item-list .item-actions {
             flex-direction: row-reverse;
-        }
-
-        @media (max-width: 768px) {
-            [dir="rtl"] .item-list .item {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            [dir="rtl"] .item-list .item-actions {
-                justify-content: flex-start;
-            }
-        }
-
-        /* Scrollbar styling */
-        .item-list::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .item-list::-webkit-scrollbar-track {
-            background: var(--bg-primary);
-            border-radius: 10px;
-        }
-
-        .item-list::-webkit-scrollbar-thumb {
-            background: var(--gold);
-            border-radius: 10px;
-        }
-
-        .item-list::-webkit-scrollbar-thumb:hover {
-            background: var(--gold-dark);
         }
     </style>
 </head>
@@ -742,37 +565,109 @@
                     </svg>
                     <span data-i18n="dashboard.general">General Information</span>
                 </h3>
-                <form id="eventForm">
+                
+                <!-- Language Tabs -->
+                <div class="lang-tabs">
+                    <button class="lang-tab active" data-lang="en">English</button>
+                    <button class="lang-tab" data-lang="ar">العربية</button>
+                </div>
+
+                <!-- English Version -->
+                <div class="lang-content active" id="lang-en">
+                    <form id="eventFormEn">
+                        <div class="form-group">
+                            <label>Baby Name</label>
+                            <input type="text" id="editBabyNameEn" placeholder="Baby's full name">
+                        </div>
+                        <div class="form-group">
+                            <label>Parents Names</label>
+                            <input type="text" id="editParentsNamesEn" placeholder="Parent names (e.g., Michael & Sarah)">
+                        </div>
+                        <div class="form-group">
+                            <label>Church</label>
+                            <input type="text" id="editChurchEn" placeholder="Church name">
+                        </div>
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="text" id="editDateEn" placeholder="e.g., June 29, 2026">
+                        </div>
+                        <div class="form-group">
+                            <label>Time</label>
+                            <input type="text" id="editTimeEn" placeholder="e.g., 10:00 AM">
+                        </div>
+                        <div class="form-group">
+                            <label>Reception</label>
+                            <input type="text" id="editReceptionEn" placeholder="Reception venue">
+                        </div>
+                        <div class="form-group">
+                            <label>Google Maps Link</label>
+                            <input type="text" id="editMapLinkEn" placeholder="Google Maps embed URL">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update Event (EN)</button>
+                    </form>
+                </div>
+
+                <!-- Arabic Version -->
+                <div class="lang-content" id="lang-ar">
+                    <form id="eventFormAr">
+                        <div class="form-group">
+                            <label>اسم الطفل</label>
+                            <input type="text" id="editBabyNameAr" placeholder="الاسم الكامل للطفل">
+                        </div>
+                        <div class="form-group">
+                            <label>أسماء الوالدين</label>
+                            <input type="text" id="editParentsNamesAr" placeholder="أسماء الوالدين (مثل: مايكل وسارة)">
+                        </div>
+                        <div class="form-group">
+                            <label>الكنيسة</label>
+                            <input type="text" id="editChurchAr" placeholder="اسم الكنيسة">
+                        </div>
+                        <div class="form-group">
+                            <label>التاريخ</label>
+                            <input type="text" id="editDateAr" placeholder="مثل: ٢٩ يونيو ٢٠٢٦">
+                        </div>
+                        <div class="form-group">
+                            <label>الوقت</label>
+                            <input type="text" id="editTimeAr" placeholder="مثل: ١٠:٠٠ ص">
+                        </div>
+                        <div class="form-group">
+                            <label>الاستقبال</label>
+                            <input type="text" id="editReceptionAr" placeholder="مكان الاستقبال">
+                        </div>
+                        <div class="form-group">
+                            <label>رابط خرائط جوجل</label>
+                            <input type="text" id="editMapLinkAr" placeholder="رابط تضمين خرائط جوجل">
+                        </div>
+                        <button type="submit" class="btn btn-primary">تحديث الحدث (AR)</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Timeline Management -->
+            <div class="dashboard-card">
+                <h3>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    <span data-i18n="dashboard.timelineManagement">Timeline Management</span>
+                </h3>
+                <form id="timelineForm">
                     <div class="form-group">
-                        <label data-i18n="dashboard.babyName">Baby Name</label>
-                        <input type="text" id="editBabyName" data-i18n-placeholder="dashboard.babyNamePlaceholder" placeholder="Baby's full name">
+                        <label data-i18n="dashboard.timelineTitle">Title</label>
+                        <input type="text" id="timelineTitle" data-i18n-placeholder="dashboard.timelineTitlePlaceholder" placeholder="e.g., 10:00 AM - Arrival" required>
                     </div>
                     <div class="form-group">
-                        <label data-i18n="dashboard.parentsNames">Parents Names</label>
-                        <input type="text" id="editParentsNames" data-i18n-placeholder="dashboard.parentsNamesPlaceholder" placeholder="Parent names (e.g., Michael & Sarah)">
+                        <label data-i18n="dashboard.timelineDesc">Description</label>
+                        <input type="text" id="timelineDesc" data-i18n-placeholder="dashboard.timelineDescPlaceholder" placeholder="Brief description">
                     </div>
-                    <div class="form-group">
-                        <label data-i18n="dashboard.church">Church</label>
-                        <input type="text" id="editChurch" data-i18n-placeholder="dashboard.churchPlaceholder" placeholder="Church name">
-                    </div>
-                    <div class="form-group">
-                        <label data-i18n="dashboard.date">Date</label>
-                        <input type="text" id="editDate" data-i18n-placeholder="dashboard.datePlaceholder" placeholder="e.g., June 29, 2026">
-                    </div>
-                    <div class="form-group">
-                        <label data-i18n="dashboard.time">Time</label>
-                        <input type="text" id="editTime" data-i18n-placeholder="dashboard.timePlaceholder" placeholder="e.g., 10:00 AM">
-                    </div>
-                    <div class="form-group">
-                        <label data-i18n="dashboard.reception">Reception</label>
-                        <input type="text" id="editReception" data-i18n-placeholder="dashboard.receptionPlaceholder" placeholder="Reception venue">
-                    </div>
-                    <div class="form-group">
-                        <label data-i18n="dashboard.mapLink">Google Maps Link</label>
-                        <input type="text" id="editMapLink" data-i18n-placeholder="dashboard.mapLinkPlaceholder" placeholder="Google Maps embed URL">
-                    </div>
-                    <button type="submit" class="btn btn-primary" data-i18n="dashboard.updateEvent">Update Event</button>
+                    <button type="submit" class="btn btn-primary" data-i18n="dashboard.addTimeline">Add Timeline Item</button>
                 </form>
+                <div style="margin-top: 1rem;">
+                    <h4 style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.5rem; transition: var(--transition);" data-i18n="dashboard.currentTimeline">Current Timeline</h4>
+                    <div class="item-list" id="timelineList">
+                    </div>
+                </div>
             </div>
 
             <!-- Gallery Management -->
@@ -788,8 +683,11 @@
                 <form id="galleryForm">
                     <div class="form-group">
                         <label data-i18n="dashboard.uploadImage">Upload Image</label>
-                        <input type="file" id="galleryFile" accept="image/*" required>
-                        <div class="file-size-info" id="galleryFileInfo">Choose an image file (any size)</div>
+                        <div class="file-input-wrapper">
+                            <button class="btn btn-outline btn-sm" data-i18n="dashboard.chooseImage">Choose Image</button>
+                            <input type="file" id="galleryFile" accept="image/*" required>
+                        </div>
+                        <span id="galleryFileName" style="font-size: 0.8rem; color: var(--text-secondary); margin-left: 0.5rem; transition: var(--transition);"></span>
                     </div>
                     <button type="submit" class="btn btn-primary" data-i18n="dashboard.upload">Upload Image</button>
                 </form>
@@ -813,7 +711,6 @@
                     <div class="form-group">
                         <label data-i18n="dashboard.videoFile">Upload Video</label>
                         <input type="file" id="videoFile" accept="video/*" required>
-                        <div class="file-size-info" id="videoFileInfo">Choose a video file (any size)</div>
                     </div>
                     <div class="form-group">
                         <label data-i18n="dashboard.videoTitle">Title</label>
@@ -840,13 +737,34 @@
                     </svg>
                     <span data-i18n="dashboard.parentsMessage">Parents' Message</span>
                 </h3>
-                <form id="messageForm">
-                    <div class="form-group">
-                        <label data-i18n="dashboard.message">Message</label>
-                        <textarea id="editMessage" data-i18n-placeholder="dashboard.messagePlaceholder" placeholder="Write a heartfelt message..."></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary" data-i18n="dashboard.updateMessage">Update Message</button>
-                </form>
+                
+                <!-- Language Tabs for Message -->
+                <div class="lang-tabs">
+                    <button class="lang-tab active" data-lang="msg-en">English</button>
+                    <button class="lang-tab" data-lang="msg-ar">العربية</button>
+                </div>
+
+                <!-- English Message -->
+                <div class="lang-content active" id="msg-en">
+                    <form id="messageFormEn">
+                        <div class="form-group">
+                            <label>Message (English)</label>
+                            <textarea id="editMessageEn" placeholder="Write a heartfelt message in English..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update Message (EN)</button>
+                    </form>
+                </div>
+
+                <!-- Arabic Message -->
+                <div class="lang-content" id="msg-ar">
+                    <form id="messageFormAr">
+                        <div class="form-group">
+                            <label>الرسالة (بالعربية)</label>
+                            <textarea id="editMessageAr" placeholder="اكتب رسالة من القلب بالعربية..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">تحديث الرسالة (AR)</button>
+                    </form>
+                </div>
             </div>
 
             <!-- Tools -->
@@ -865,7 +783,7 @@
                     <button class="btn btn-outline" id="copyLinkBtn" data-i18n="dashboard.copyLink">Copy Invitation Link</button>
                 </div>
                 <div id="qrContainer" style="text-align: center; margin-top: 1rem; display: none;">
-                    <img id="qrCode" src="" alt="QR Code" style="max-width: 200px; border-radius: 12px; box-shadow: var(--shadow); width: 100%; height: auto;">
+                    <img id="qrCode" src="" alt="QR Code" style="max-width: 200px; border-radius: 12px; box-shadow: var(--shadow);">
                     <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem; transition: var(--transition);" data-i18n="dashboard.scanQR">Scan to view the invitation</p>
                 </div>
             </div>
@@ -873,6 +791,7 @@
     </main>
 
     <script>
+        // Language translations
         const translations = {
             en: {
                 'dashboard.brand': 'Baptism Blessing',
@@ -881,23 +800,16 @@
                 'dashboard.title': 'Welcome to Baptism Blessing Dashboard',
                 'dashboard.subtitle': 'Manage your invitation website content',
                 'dashboard.general': 'General Information',
-                'dashboard.babyName': 'Baby Name',
-                'dashboard.babyNamePlaceholder': 'Baby\'s full name',
-                'dashboard.parentsNames': 'Parents Names',
-                'dashboard.parentsNamesPlaceholder': 'Parent names (e.g., Michael & Sarah)',
-                'dashboard.church': 'Church',
-                'dashboard.churchPlaceholder': 'Church name',
-                'dashboard.date': 'Date',
-                'dashboard.datePlaceholder': 'e.g., June 29, 2026',
-                'dashboard.time': 'Time',
-                'dashboard.timePlaceholder': 'e.g., 10:00 AM',
-                'dashboard.reception': 'Reception',
-                'dashboard.receptionPlaceholder': 'Reception venue',
-                'dashboard.mapLink': 'Google Maps Link',
-                'dashboard.mapLinkPlaceholder': 'Google Maps embed URL',
-                'dashboard.updateEvent': 'Update Event',
+                'dashboard.timelineManagement': 'Timeline Management',
+                'dashboard.timelineTitle': 'Title',
+                'dashboard.timelineTitlePlaceholder': 'e.g., 10:00 AM - Arrival',
+                'dashboard.timelineDesc': 'Description',
+                'dashboard.timelineDescPlaceholder': 'Brief description',
+                'dashboard.addTimeline': 'Add Timeline Item',
+                'dashboard.currentTimeline': 'Current Timeline',
                 'dashboard.galleryManagement': 'Gallery Management',
                 'dashboard.uploadImage': 'Upload Image',
+                'dashboard.chooseImage': 'Choose Image',
                 'dashboard.upload': 'Upload Image',
                 'dashboard.currentGallery': 'Current Gallery',
                 'dashboard.videoManagement': 'Video Management',
@@ -909,9 +821,6 @@
                 'dashboard.uploadVideo': 'Upload Video',
                 'dashboard.currentVideos': 'Current Videos',
                 'dashboard.parentsMessage': 'Parents\' Message',
-                'dashboard.message': 'Message',
-                'dashboard.messagePlaceholder': 'Write a heartfelt message...',
-                'dashboard.updateMessage': 'Update Message',
                 'dashboard.tools': 'Tools',
                 'dashboard.generateQR': 'Generate QR Code',
                 'dashboard.copyLink': 'Copy Invitation Link',
@@ -927,23 +836,16 @@
                 'dashboard.title': 'مرحباً بكم في لوحة تحكم معمودية البركة',
                 'dashboard.subtitle': 'إدارة محتوى موقع دعوتكم',
                 'dashboard.general': 'المعلومات العامة',
-                'dashboard.babyName': 'اسم الطفل',
-                'dashboard.babyNamePlaceholder': 'الاسم الكامل للطفل',
-                'dashboard.parentsNames': 'أسماء الوالدين',
-                'dashboard.parentsNamesPlaceholder': 'أسماء الوالدين (مثل: مايكل وسارة)',
-                'dashboard.church': 'الكنيسة',
-                'dashboard.churchPlaceholder': 'اسم الكنيسة',
-                'dashboard.date': 'التاريخ',
-                'dashboard.datePlaceholder': 'مثل: ٢٩ يونيو ٢٠٢٦',
-                'dashboard.time': 'الوقت',
-                'dashboard.timePlaceholder': 'مثل: ١٠:٠٠ ص',
-                'dashboard.reception': 'الاستقبال',
-                'dashboard.receptionPlaceholder': 'مكان الاستقبال',
-                'dashboard.mapLink': 'رابط خرائط جوجل',
-                'dashboard.mapLinkPlaceholder': 'رابط تضمين خرائط جوجل',
-                'dashboard.updateEvent': 'تحديث الحدث',
+                'dashboard.timelineManagement': 'إدارة الجدول الزمني',
+                'dashboard.timelineTitle': 'العنوان',
+                'dashboard.timelineTitlePlaceholder': 'مثل: ١٠:٠٠ ص - الوصول',
+                'dashboard.timelineDesc': 'الوصف',
+                'dashboard.timelineDescPlaceholder': 'وصف مختصر',
+                'dashboard.addTimeline': 'إضافة عنصر للجدول الزمني',
+                'dashboard.currentTimeline': 'الجدول الزمني الحالي',
                 'dashboard.galleryManagement': 'إدارة المعرض',
                 'dashboard.uploadImage': 'رفع صورة',
+                'dashboard.chooseImage': 'اختر صورة',
                 'dashboard.upload': 'رفع الصورة',
                 'dashboard.currentGallery': 'المعرض الحالي',
                 'dashboard.videoManagement': 'إدارة الفيديوهات',
@@ -955,9 +857,6 @@
                 'dashboard.uploadVideo': 'رفع الفيديو',
                 'dashboard.currentVideos': 'الفيديوهات الحالية',
                 'dashboard.parentsMessage': 'رسالة الوالدين',
-                'dashboard.message': 'الرسالة',
-                'dashboard.messagePlaceholder': 'اكتب رسالة من القلب...',
-                'dashboard.updateMessage': 'تحديث الرسالة',
                 'dashboard.tools': 'الأدوات',
                 'dashboard.generateQR': 'إنشاء رمز QR',
                 'dashboard.copyLink': 'نسخ رابط الدعوة',
@@ -968,9 +867,35 @@
             }
         };
 
+        // Default data from index.html
+        const defaultData = {
+            en: {
+                babyName: 'Mikal Mina',
+                parentsNames: 'Mina & Mariam',
+                church: 'Monastery of Saint Bishoy',
+                date: 'Saturday, July 4, 2026',
+                time: '6:00 AM',
+                reception: 'Anba Bishoy Monastery Road, Wadi El Natrun',
+                mapLink: 'https://maps.app.goo.gl/a6TVWifecD19cr9s9',
+                parentsMessage: '"We are delighted and honored by your presence to celebrate the Holy Sacrament of Baptism of our precious child Mikal Mina"'
+            },
+            ar: {
+                babyName: 'ميكال مينا',
+                parentsNames: 'مينا ومريم',
+                church: 'دير الأنبا بيشوي',
+                date: 'السبت، ٤ يوليو ٢٠٢٦',
+                time: '٦:٠٠ صباحاً',
+                reception: 'طريق دير الأنبا بيشوي، وادي النطرون',
+                mapLink: 'https://maps.app.goo.gl/a6TVWifecD19cr9s9',
+                parentsMessage: '"يسعدنا ويشرفنا حضوركم للاحتفال بسر المعمودية المقدسة لطفلتنا الغالية ميكال مينا"'
+            }
+        };
+
         let currentLang = 'en';
         let currentTheme = 'light';
+        let token = null;
 
+        // Theme management
         function setTheme(theme) {
             currentTheme = theme;
             document.documentElement.setAttribute('data-theme', theme === 'dark' ? 'dark' : 'light');
@@ -1003,6 +928,7 @@
             }
         }
 
+        // Language management
         function setLanguage(lang) {
             currentLang = lang;
             localStorage.setItem('language', lang);
@@ -1025,28 +951,49 @@
             });
         }
 
+        // Language tabs for General Information
+        document.querySelectorAll('.lang-tab[data-lang]').forEach(tab => {
+            tab.addEventListener('click', function() {
+                const lang = this.dataset.lang;
+                const parent = this.closest('.dashboard-card');
+                
+                // Remove active from all tabs in this card
+                parent.querySelectorAll('.lang-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Show corresponding content
+                parent.querySelectorAll('.lang-content').forEach(c => c.classList.remove('active'));
+                parent.querySelector(`#${lang}`).classList.add('active');
+            });
+        });
+
+        // Toggle theme
         document.getElementById('themeToggle').addEventListener('click', function() {
             setTheme(currentTheme === 'light' ? 'dark' : 'light');
         });
 
+        // Toggle language
         document.getElementById('langToggle').addEventListener('click', function() {
             setLanguage(currentLang === 'en' ? 'ar' : 'en');
         });
 
+        // Load saved preferences
         const savedTheme = localStorage.getItem('theme') || 'light';
         const savedLang = localStorage.getItem('language') || 'en';
         setTheme(savedTheme);
         setLanguage(savedLang);
 
+        // Get token
         function getToken() {
             return localStorage.getItem('token');
         }
 
-        const token = getToken();
+        token = getToken();
         if (!token) {
             window.location.href = '/login';
         }
 
+        // Logout
         document.getElementById('logoutBtn').addEventListener('click', async function() {
             try {
                 await fetch('/api/logout', {
@@ -1061,10 +1008,12 @@
             window.location.href = '/login';
         });
 
+        // Hamburger menu
         document.getElementById('hamburger').addEventListener('click', function() {
             document.getElementById('navLinks').classList.toggle('active');
         });
 
+        // Show status message
         function showStatus(message, type = 'success') {
             const el = document.getElementById('statusMessage');
             el.textContent = message;
@@ -1074,45 +1023,100 @@
             }, 5000);
         }
 
-        // Load event data
-        async function loadEventData() {
+        // Load data from Firestore or use default
+        async function loadAllData() {
             try {
                 const response = await fetch('/api/event', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                     },
                 });
+                
+                let data = null;
                 if (response.ok) {
-                    const data = await response.json();
-                    if (data) {
-                        document.getElementById('editBabyName').value = data.babyName || '';
-                        document.getElementById('editParentsNames').value = data.parentsNames || '';
-                        document.getElementById('editChurch').value = data.church || '';
-                        document.getElementById('editDate').value = data.date || '';
-                        document.getElementById('editTime').value = data.time || '';
-                        document.getElementById('editReception').value = data.reception || '';
-                        document.getElementById('editMapLink').value = data.mapLink || '';
-                        document.getElementById('editMessage').value = data.parentsMessage || '';
-                    }
+                    data = await response.json();
                 }
+
+                // If no data in Firestore, use default data from index.html
+                if (!data || Object.keys(data).length === 0) {
+                    data = {
+                        babyName: defaultData.en.babyName,
+                        parentsNames: defaultData.en.parentsNames,
+                        church: defaultData.en.church,
+                        date: defaultData.en.date,
+                        time: defaultData.en.time,
+                        reception: defaultData.en.reception,
+                        mapLink: defaultData.en.mapLink,
+                        parentsMessage: defaultData.en.parentsMessage,
+                        babyNameAr: defaultData.ar.babyName,
+                        parentsNamesAr: defaultData.ar.parentsNames,
+                        churchAr: defaultData.ar.church,
+                        dateAr: defaultData.ar.date,
+                        timeAr: defaultData.ar.time,
+                        receptionAr: defaultData.ar.reception,
+                        mapLinkAr: defaultData.ar.mapLink,
+                        parentsMessageAr: defaultData.ar.parentsMessage
+                    };
+                }
+
+                // Fill English fields
+                document.getElementById('editBabyNameEn').value = data.babyName || defaultData.en.babyName;
+                document.getElementById('editParentsNamesEn').value = data.parentsNames || defaultData.en.parentsNames;
+                document.getElementById('editChurchEn').value = data.church || defaultData.en.church;
+                document.getElementById('editDateEn').value = data.date || defaultData.en.date;
+                document.getElementById('editTimeEn').value = data.time || defaultData.en.time;
+                document.getElementById('editReceptionEn').value = data.reception || defaultData.en.reception;
+                document.getElementById('editMapLinkEn').value = data.mapLink || defaultData.en.mapLink;
+                document.getElementById('editMessageEn').value = data.parentsMessage || defaultData.en.parentsMessage;
+
+                // Fill Arabic fields
+                document.getElementById('editBabyNameAr').value = data.babyNameAr || defaultData.ar.babyName;
+                document.getElementById('editParentsNamesAr').value = data.parentsNamesAr || defaultData.ar.parentsNames;
+                document.getElementById('editChurchAr').value = data.churchAr || defaultData.ar.church;
+                document.getElementById('editDateAr').value = data.dateAr || defaultData.ar.date;
+                document.getElementById('editTimeAr').value = data.timeAr || defaultData.ar.time;
+                document.getElementById('editReceptionAr').value = data.receptionAr || defaultData.ar.reception;
+                document.getElementById('editMapLinkAr').value = data.mapLinkAr || defaultData.ar.mapLink;
+                document.getElementById('editMessageAr').value = data.parentsMessageAr || defaultData.ar.parentsMessage;
+
             } catch (error) {
-                console.error('Error loading event data:', error);
+                console.error('Error loading data:', error);
+                // Use default data if fetch fails
+                fillDefaultData();
             }
         }
 
-        loadEventData();
+        function fillDefaultData() {
+            document.getElementById('editBabyNameEn').value = defaultData.en.babyName;
+            document.getElementById('editParentsNamesEn').value = defaultData.en.parentsNames;
+            document.getElementById('editChurchEn').value = defaultData.en.church;
+            document.getElementById('editDateEn').value = defaultData.en.date;
+            document.getElementById('editTimeEn').value = defaultData.en.time;
+            document.getElementById('editReceptionEn').value = defaultData.en.reception;
+            document.getElementById('editMapLinkEn').value = defaultData.en.mapLink;
+            document.getElementById('editMessageEn').value = defaultData.en.parentsMessage;
 
-        // Update event
-        document.getElementById('eventForm').addEventListener('submit', async function(e) {
+            document.getElementById('editBabyNameAr').value = defaultData.ar.babyName;
+            document.getElementById('editParentsNamesAr').value = defaultData.ar.parentsNames;
+            document.getElementById('editChurchAr').value = defaultData.ar.church;
+            document.getElementById('editDateAr').value = defaultData.ar.date;
+            document.getElementById('editTimeAr').value = defaultData.ar.time;
+            document.getElementById('editReceptionAr').value = defaultData.ar.reception;
+            document.getElementById('editMapLinkAr').value = defaultData.ar.mapLink;
+            document.getElementById('editMessageAr').value = defaultData.ar.parentsMessage;
+        }
+
+        // Update Event (English)
+        document.getElementById('eventFormEn').addEventListener('submit', async function(e) {
             e.preventDefault();
             const data = {
-                babyName: document.getElementById('editBabyName').value,
-                parentsNames: document.getElementById('editParentsNames').value,
-                church: document.getElementById('editChurch').value,
-                date: document.getElementById('editDate').value,
-                time: document.getElementById('editTime').value,
-                reception: document.getElementById('editReception').value,
-                mapLink: document.getElementById('editMapLink').value,
+                babyName: document.getElementById('editBabyNameEn').value,
+                parentsNames: document.getElementById('editParentsNamesEn').value,
+                church: document.getElementById('editChurchEn').value,
+                date: document.getElementById('editDateEn').value,
+                time: document.getElementById('editTimeEn').value,
+                reception: document.getElementById('editReceptionEn').value,
+                mapLink: document.getElementById('editMapLinkEn').value,
             };
 
             try {
@@ -1125,19 +1129,51 @@
                     body: JSON.stringify(data),
                 });
                 if (response.ok) {
-                    showStatus(currentLang === 'ar' ? 'تم تحديث معلومات الحدث بنجاح!' : 'Event information updated successfully!');
+                    showStatus('Event information updated successfully!');
                 } else {
-                    showStatus(currentLang === 'ar' ? 'فشل في تحديث معلومات الحدث.' : 'Failed to update event information.', 'error');
+                    showStatus('Failed to update event information.', 'error');
                 }
             } catch (error) {
-                showStatus(currentLang === 'ar' ? 'خطأ في الشبكة. يرجى المحاولة مرة أخرى.' : 'Network error. Please try again.', 'error');
+                showStatus('Network error. Please try again.', 'error');
             }
         });
 
-        // Update message
-        document.getElementById('messageForm').addEventListener('submit', async function(e) {
+        // Update Event (Arabic)
+        document.getElementById('eventFormAr').addEventListener('submit', async function(e) {
             e.preventDefault();
-            const message = document.getElementById('editMessage').value;
+            const data = {
+                babyNameAr: document.getElementById('editBabyNameAr').value,
+                parentsNamesAr: document.getElementById('editParentsNamesAr').value,
+                churchAr: document.getElementById('editChurchAr').value,
+                dateAr: document.getElementById('editDateAr').value,
+                timeAr: document.getElementById('editTimeAr').value,
+                receptionAr: document.getElementById('editReceptionAr').value,
+                mapLinkAr: document.getElementById('editMapLinkAr').value,
+            };
+
+            try {
+                const response = await fetch('/api/event', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    body: JSON.stringify(data),
+                });
+                if (response.ok) {
+                    showStatus('تم تحديث معلومات الحدث بنجاح!');
+                } else {
+                    showStatus('فشل في تحديث معلومات الحدث.', 'error');
+                }
+            } catch (error) {
+                showStatus('خطأ في الشبكة. يرجى المحاولة مرة أخرى.', 'error');
+            }
+        });
+
+        // Update Message (English)
+        document.getElementById('messageFormEn').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const message = document.getElementById('editMessageEn').value;
 
             try {
                 const response = await fetch('/api/event', {
@@ -1149,9 +1185,122 @@
                     body: JSON.stringify({ parentsMessage: message }),
                 });
                 if (response.ok) {
-                    showStatus(currentLang === 'ar' ? 'تم تحديث الرسالة بنجاح!' : 'Message updated successfully!');
+                    showStatus('Message updated successfully!');
                 } else {
-                    showStatus(currentLang === 'ar' ? 'فشل في تحديث الرسالة.' : 'Failed to update message.', 'error');
+                    showStatus('Failed to update message.', 'error');
+                }
+            } catch (error) {
+                showStatus('Network error. Please try again.', 'error');
+            }
+        });
+
+        // Update Message (Arabic)
+        document.getElementById('messageFormAr').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const message = document.getElementById('editMessageAr').value;
+
+            try {
+                const response = await fetch('/api/event', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ parentsMessageAr: message }),
+                });
+                if (response.ok) {
+                    showStatus('تم تحديث الرسالة بنجاح!');
+                } else {
+                    showStatus('فشل في تحديث الرسالة.', 'error');
+                }
+            } catch (error) {
+                showStatus('خطأ في الشبكة. يرجى المحاولة مرة أخرى.', 'error');
+            }
+        });
+
+        // Load timeline
+        async function loadTimeline() {
+            try {
+                const response = await fetch('/api/timeline', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+                if (response.ok) {
+                    const items = await response.json();
+                    const list = document.getElementById('timelineList');
+                    list.innerHTML = '';
+                    const deleteLabel = currentLang === 'ar' ? 'حذف' : 'Delete';
+                    if (items && items.length > 0) {
+                        items.forEach(item => {
+                            const div = document.createElement('div');
+                            div.className = 'item';
+                            div.innerHTML = `
+                                <div>
+                                    <strong>${item.title}</strong>
+                                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0; transition: var(--transition);">${item.description || ''}</p>
+                                </div>
+                                <div class="item-actions">
+                                    <button class="btn btn-danger btn-sm delete-timeline" data-id="${item.id}">${deleteLabel}</button>
+                                </div>
+                            `;
+                            list.appendChild(div);
+                        });
+                        document.querySelectorAll('.delete-timeline').forEach(btn => {
+                            btn.addEventListener('click', async function() {
+                                const id = this.dataset.id;
+                                const confirmMsg = currentLang === 'ar' ? 'حذف هذا العنصر من الجدول الزمني؟' : 'Delete this timeline item?';
+                                if (confirm(confirmMsg)) {
+                                    try {
+                                        const response = await fetch(`/api/timeline/${id}`, {
+                                            method: 'DELETE',
+                                            headers: {
+                                                'Authorization': `Bearer ${token}`,
+                                            },
+                                        });
+                                        if (response.ok) {
+                                            showStatus(currentLang === 'ar' ? 'تم حذف عنصر الجدول الزمني.' : 'Timeline item deleted.');
+                                            loadTimeline();
+                                        }
+                                    } catch (error) {
+                                        showStatus(currentLang === 'ar' ? 'خطأ في حذف عنصر الجدول الزمني.' : 'Error deleting timeline item.', 'error');
+                                    }
+                                }
+                            });
+                        });
+                    } else {
+                        list.innerHTML = `<div style="text-align: center; padding: 1rem; color: var(--text-secondary);">${currentLang === 'ar' ? 'لا توجد عناصر في الجدول الزمني' : 'No timeline items'}</div>`;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading timeline:', error);
+            }
+        }
+
+        loadTimeline();
+
+        // Add timeline item
+        document.getElementById('timelineForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const title = document.getElementById('timelineTitle').value;
+            const description = document.getElementById('timelineDesc').value;
+
+            try {
+                const response = await fetch('/api/timeline', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ title, description }),
+                });
+                if (response.ok) {
+                    showStatus(currentLang === 'ar' ? 'تم إضافة عنصر الجدول الزمني!' : 'Timeline item added!');
+                    document.getElementById('timelineTitle').value = '';
+                    document.getElementById('timelineDesc').value = '';
+                    loadTimeline();
+                } else {
+                    showStatus(currentLang === 'ar' ? 'فشل في إضافة عنصر الجدول الزمني.' : 'Failed to add timeline item.', 'error');
                 }
             } catch (error) {
                 showStatus(currentLang === 'ar' ? 'خطأ في الشبكة. يرجى المحاولة مرة أخرى.' : 'Network error. Please try again.', 'error');
@@ -1177,9 +1326,9 @@
                             const div = document.createElement('div');
                             div.className = 'item';
                             div.innerHTML = `
-                                <div class="item-info">
-                                    <img src="${item.url}" alt="${item.title || imageLabel}">
-                                    <span style="font-size: clamp(0.75rem, 1vw, 0.9rem); word-break: break-word;">${item.title || imageLabel}</span>
+                                <div style="display: flex; align-items: center; gap: 1rem;">
+                                    <img src="${item.url}" alt="${item.title || imageLabel}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
+                                    <span style="font-size: 0.9rem;">${item.title || imageLabel}</span>
                                 </div>
                                 <div class="item-actions">
                                     <button class="btn btn-danger btn-sm delete-gallery" data-id="${item.id}">${deleteLabel}</button>
@@ -1244,7 +1393,7 @@
                 if (response.ok) {
                     showStatus(currentLang === 'ar' ? 'تم رفع الصورة بنجاح!' : 'Image uploaded successfully!');
                     fileInput.value = '';
-                    document.getElementById('galleryFileInfo').textContent = currentLang === 'ar' ? 'اختر ملف صورة (أي حجم)' : 'Choose an image file (any size)';
+                    document.getElementById('galleryFileName').textContent = '';
                     loadGallery();
                 } else {
                     showStatus(currentLang === 'ar' ? 'فشل في رفع الصورة.' : 'Failed to upload image.', 'error');
@@ -1255,11 +1404,8 @@
         });
 
         document.getElementById('galleryFile').addEventListener('change', function() {
-            const file = this.files[0];
-            if (file) {
-                const size = (file.size / (1024 * 1024)).toFixed(2);
-                document.getElementById('galleryFileInfo').textContent = `${file.name} (${size} MB)`;
-            }
+            const fileName = this.files[0]?.name || '';
+            document.getElementById('galleryFileName').textContent = fileName;
         });
 
         // Load videos
@@ -1281,12 +1427,9 @@
                             const div = document.createElement('div');
                             div.className = 'item';
                             div.innerHTML = `
-                                <div class="item-info">
-                                    <div class="video-icon">🎬</div>
-                                    <div>
-                                        <strong style="font-size: clamp(0.75rem, 1vw, 0.9rem);">${item.title || videoLabel}</strong>
-                                        <p style="font-size: clamp(0.6rem, 0.8vw, 0.75rem); color: var(--text-secondary); margin: 0; transition: var(--transition); word-break: break-word;">${item.description || ''}</p>
-                                    </div>
+                                <div>
+                                    <strong>${item.title || videoLabel}</strong>
+                                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0; transition: var(--transition);">${item.description || ''}</p>
                                 </div>
                                 <div class="item-actions">
                                     <button class="btn btn-danger btn-sm delete-video" data-id="${item.id}">${deleteLabel}</button>
@@ -1358,21 +1501,12 @@
                     fileInput.value = '';
                     document.getElementById('videoTitle').value = '';
                     document.getElementById('videoDesc').value = '';
-                    document.getElementById('videoFileInfo').textContent = currentLang === 'ar' ? 'اختر ملف فيديو (أي حجم)' : 'Choose a video file (any size)';
                     loadVideos();
                 } else {
                     showStatus(currentLang === 'ar' ? 'فشل في رفع الفيديو.' : 'Failed to upload video.', 'error');
                 }
             } catch (error) {
                 showStatus(currentLang === 'ar' ? 'خطأ في الشبكة. يرجى المحاولة مرة أخرى.' : 'Network error. Please try again.', 'error');
-            }
-        });
-
-        document.getElementById('videoFile').addEventListener('change', function() {
-            const file = this.files[0];
-            if (file) {
-                const size = (file.size / (1024 * 1024)).toFixed(2);
-                document.getElementById('videoFileInfo').textContent = `${file.name} (${size} MB)`;
             }
         });
 
@@ -1400,6 +1534,9 @@
                 showStatus(currentLang === 'ar' ? 'تم نسخ رابط الدعوة!' : 'Invitation link copied to clipboard!');
             });
         });
+
+        // Load all data when page loads
+        loadAllData();
 
         // Verify token on load
         fetch('/api/event', {
