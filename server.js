@@ -21,7 +21,9 @@ const requiredEnvVars = [
   'CLOUDINARY_CLOUD_NAME',
   'CLOUDINARY_API_KEY',
   'CLOUDINARY_API_SECRET',
-  'FIREBASE_CONFIG'
+  'FIREBASE_CONFIG',
+  'ADMIN_USERNAME',
+  'ADMIN_PASSWORD'
 ];
 
 const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
@@ -141,6 +143,8 @@ const upload = multer({
 // ==================== JWT CONFIGURATION ====================
 
 const JWT_SECRET = process.env.JWT_SECRET;
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
 // ==================== DATABASE INITIALIZATION ====================
 
@@ -182,6 +186,23 @@ async function initializeDatabase() {
         });
       }
       console.log('✅ Default timeline data created');
+    }
+
+    // Create admin user if not exists
+    const userSnapshot = await db.collection('users')
+      .where('username', '==', ADMIN_USERNAME)
+      .limit(1)
+      .get();
+
+    if (userSnapshot.empty) {
+      const hashedPassword = await bcrypt.hash(ADMIN_PASSWORD, 10);
+      await db.collection('users').add({
+        username: ADMIN_USERNAME,
+        password: hashedPassword,
+        role: 'admin',
+        createdAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+      console.log('✅ Admin user created');
     }
 
     console.log('✅ Database initialized successfully');
@@ -252,21 +273,28 @@ app.post('/api/login', [
       userData = userSnapshot.docs[0].data();
     }
 
-    // If no user found, check hardcoded admin (for backwards compatibility)
+    // If no user found, check hardcoded admin from .env (for backwards compatibility)
     if (!userData) {
-      // Hardcoded admin check
-      if (username === 'admin' && password === 'admin123') {
-        // Create admin user in database
-        const hashedPassword = await bcrypt.hash('admin123', 10);
-        const newUserRef = await db.collection('users').add({
-          username: 'admin',
-          password: hashedPassword,
-          role: 'admin',
-          createdAt: admin.firestore.FieldValue.serverTimestamp()
-        });
+      // Check against .env admin credentials
+      if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+        // Create admin user in database if not exists
+        const adminCheck = await db.collection('users')
+          .where('username', '==', ADMIN_USERNAME)
+          .limit(1)
+          .get();
+
+        if (adminCheck.empty) {
+          const hashedPassword = await bcrypt.hash(ADMIN_PASSWORD, 10);
+          await db.collection('users').add({
+            username: ADMIN_USERNAME,
+            password: hashedPassword,
+            role: 'admin',
+            createdAt: admin.firestore.FieldValue.serverTimestamp()
+          });
+        }
 
         const token = jwt.sign(
-          { username: 'admin', role: 'admin' },
+          { username: ADMIN_USERNAME, role: 'admin' },
           JWT_SECRET,
           { expiresIn: rememberMe ? '30d' : '24h' }
         );
@@ -274,7 +302,7 @@ app.post('/api/login', [
         return res.json({ 
           token, 
           message: 'Login successful',
-          user: { username: 'admin', role: 'admin' }
+          user: { username: ADMIN_USERNAME, role: 'admin' }
         });
       }
       
@@ -652,6 +680,23 @@ app.delete('/api/timeline/:id', authenticateToken, async (req, res) => {
   }
 });
 
+// ==================== HTML ROUTES (Clean URLs) ====================
+
+// Serve index.html for root
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Serve login.html for /login
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+
+// Serve dashboard.html for /dashboard
+app.get('/dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+});
+
 // ==================== FALLBACK ROUTE ====================
 
 // Serve index.html for all other routes (SPA support)
@@ -660,7 +705,8 @@ app.get('*', (req, res) => {
   if (req.path.startsWith('/api/')) {
     return res.status(404).json({ message: 'API endpoint not found' });
   }
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  // Redirect to root for any other routes
+  res.redirect('/');
 });
 
 // ==================== ERROR HANDLING ====================
@@ -670,7 +716,7 @@ app.use((req, res, next) => {
   if (req.path.startsWith('/api/')) {
     res.status(404).json({ message: 'API endpoint not found' });
   } else {
-    res.status(404).sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.redirect('/');
   }
 });
 
@@ -716,11 +762,14 @@ initializeDatabase().then(() => {
     console.log(`☁️  Cloudinary: ${process.env.CLOUDINARY_CLOUD_NAME ? 'Configured ✅' : 'Missing ❌'}`);
     console.log(`🔥 Firebase: ${firebaseConfig.project_id ? 'Configured ✅' : 'Missing ❌'}`);
     console.log('=================================');
-    console.log('📋 Default Admin Credentials:');
-    console.log('   Username: admin');
-    console.log('   Password: admin123');
+    console.log('📋 Admin Credentials from .env:');
+    console.log(`   Username: ${ADMIN_USERNAME}`);
+    console.log(`   Password: ${ADMIN_PASSWORD}`);
     console.log('=================================');
-    console.log('💡 Change default credentials in production!');
+    console.log('🌐 Clean URLs:');
+    console.log(`   Home: http://localhost:${PORT}/`);
+    console.log(`   Login: http://localhost:${PORT}/login`);
+    console.log(`   Dashboard: http://localhost:${PORT}/dashboard`);
     console.log('=================================');
   });
 });
