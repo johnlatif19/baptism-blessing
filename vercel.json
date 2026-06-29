@@ -25,11 +25,11 @@
       "dest": "/public/dashboard.html"
     },
     {
-      "src": "/photo",
+      "src": "/gallery",
       "dest": "/public/photo.html"
     },
     {
-      "src": "/video",
+      "src": "/videos",
       "dest": "/public/video.html"
     },
     {
