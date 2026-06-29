@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baptism Blessing Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --ivory: #FDF8F0;
+            --champagne: #F5E6D3;
+            --beige: #E8D5C4;
+            --blush: #F5D6D6;
+            --warm-white: #FFF9F5;
+            --gold: #C9A96E;
+            --gold-light: #E8D5A3;
+            --gold-dark: #B8944A;
+            --text-dark: #2C1810;
+            --text-gold: #A67C52;
+            --shadow: 0 8px 32px rgba(0,0,0,0.08);
+            --glass: rgba(255, 255, 255, 0.15);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --bg-primary: #FDF8F0;
+            --bg-secondary: #FFF9F5;
+            --bg-card: #ffffff;
+            --text-primary: #2C1810;
+            --text-secondary: #A67C52;
+            --border-color: rgba(201, 169, 110, 0.1);
+            --shadow-color: rgba(0,0,0,0.08);
+            --nav-bg: rgba(253, 248, 240, 0.92);
+            --footer-bg: #2C1810;
+            --footer-text: #FFF9F5;
+            --input-bg: #FFF9F5;
+            --input-border: #F5E6D3;
+            --transition: all 0.4s ease;
+        }
+
+        [data-theme="dark"] {
+            --ivory: #1a1410;
+            --champagne: #2a1f18;
+            --beige: #33261e;
+            --blush: #2a1a1a;
+            --warm-white: #1f1814;
+            --text-dark: #f5ede8;
+            --text-gold: #d4b896;
+            --shadow: 0 8px 32px rgba(0,0,0,0.4);
+            --glass: rgba(30, 20, 15, 0.6);
+            --glass-border: rgba(200, 180, 160, 0.15);
+            --bg-primary: #1a1410;
+            --bg-secondary: #1f1814;
+            --bg-card: #2a1f18;
+            --text-primary: #f5ede8;
+            --text-secondary: #d4b896;
+            --border-color: rgba(200, 180, 160, 0.1);
+            --shadow-color: rgba(0,0,0,0.4);
+            --nav-bg: rgba(26, 20, 16, 0.92);
+            --footer-bg: #0d0a08;
+            --footer-text: #f5ede8;
+            --input-bg: #2a1f18;
+            --input-border: #3d2d22;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            transition: var(--transition);
+        }
+
+        .dashboard-nav {
+            background: var(--bg-card);
+            padding: 1rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--border-color);
+            transition: var(--transition);
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .dashboard-nav .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .dashboard-nav .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+        }
+
+        .dashboard-nav .logo svg {
+            width: 35px;
+            height: 35px;
+        }
+
+        .dashboard-nav .logo span {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .dashboard-nav .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .dashboard-nav .nav-right .user-info {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .theme-toggle, .lang-toggle {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 50px;
+            padding: 0.4rem 0.8rem;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-family: 'Poppins', sans-serif;
+            color: var(--text-primary);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .theme-toggle:hover, .lang-toggle:hover {
+            background: var(--gold);
+            color: white;
+            border-color: var(--gold);
+        }
+
+        .theme-toggle svg, .lang-toggle svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .logout-btn {
+            padding: 0.5rem 1.5rem;
+            background: transparent;
+            border: 2px solid var(--gold);
+            color: var(--gold-dark);
+            border-radius: 50px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .logout-btn:hover {
+            background: var(--gold);
+            color: white;
+        }
+
+        .dashboard-main {
+            padding: 2rem 5% 4rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            transition: var(--transition);
+        }
+
+        .dashboard-header {
+            margin-bottom: 2.5rem;
+        }
+
+        .dashboard-header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            transition: var(--transition);
+        }
+
+        .dashboard-header p {
+            color: var(--text-secondary);
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+            transition: var(--transition);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 2rem;
+        }
+
+        .dashboard-card {
+            background: var(--bg-card);
+            border-radius: 24px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px var(--shadow-color);
+        }
+
+        .dashboard-card h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: var(--transition);
+        }
+
+        .dashboard-card h3 svg {
+            width: 24px;
+            height: 24px;
+            color: var(--gold);
+        }
+
+        .dashboard-card .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .dashboard-card .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 0.25rem;
+            transition: var(--transition);
+        }
+
+        .dashboard-card .form-group input,
+        .dashboard-card .form-group textarea,
+        .dashboard-card .form-group select {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            border: 2px solid var(--input-border);
+            border-radius: 12px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.9rem;
+            transition: var(--transition);
+            background: var(--input-bg);
+            color: var(--text-primary);
+        }
+
+        .dashboard-card .form-group input:focus,
+        .dashboard-card .form-group textarea:focus {
+            outline: none;
+            border-color: var(--gold);
+        }
+
+        .dashboard-card .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .btn {
+            padding: 0.6rem 1.5rem;
+            border: none;
+            border-radius: 50px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(201, 169, 110, 0.3);
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--gold);
+            color: var(--gold-dark);
+        }
+
+        .btn-outline:hover {
+            background: var(--gold);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 0.4rem 1rem;
+            font-size: 0.8rem;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .item-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .item-list .item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .item-list .item:last-child {
+            border-bottom: none;
+        }
+
+        .item-list .item-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .status-msg {
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            display: none;
+            transition: var(--transition);
+        }
+
+        .status-msg.success {
+            display: block;
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        [data-theme="dark"] .status-msg.success {
+            background: #1a3a2a;
+            color: #8fdfb0;
+            border-color: #2a5a3a;
+        }
+
+        .status-msg.error {
+            display: block;
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        [data-theme="dark"] .status-msg.error {
+            background: #3a1a1a;
+            color: #df8f8f;
+            border-color: #5a2a2a;
+        }
+
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 5px;
+        }
+
+        .hamburger span {
+            width: 25px;
+            height: 2px;
+            background: var(--text-primary);
+            transition: var(--transition);
+            border-radius: 2px;
+        }
+
+        @media (max-width: 768px) {
+            .hamburger {
+                display: flex;
+            }
+
+            .dashboard-nav .nav-links {
+                display: none;
+                width: 100%;
+                flex-direction: column;
+                gap: 0.5rem;
+                padding: 1rem 0;
+            }
+
+            .dashboard-nav .nav-links.active {
+                display: flex;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-nav {
+                flex-wrap: wrap;
+            }
+
+            .dashboard-nav .nav-right {
+                width: 100%;
+                justify-content: flex-end;
+            }
+
+            .dashboard-nav .nav-left {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+
+        [dir="rtl"] .item-list .item {
+            flex-direction: row-reverse;
+        }
+
+        [dir="rtl"] .item-list .item-actions {
+            flex-direction: row-reverse;
+        }
+    </style>
+</head>
+<body>
+    <nav class="dashboard-nav">
+        <div class="nav-left">
+            <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <a href="/" class="logo">
+                <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="50" cy="50" r="45" stroke="#C9A96E" stroke-width="2"/>
+                    <text x="50" y="58" text-anchor="middle" font-family="Playfair Display, serif" font-size="28" fill="#C9A96E" font-weight="700">✝</text>
+                    <text x="50" y="78" text-anchor="middle" font-family="Playfair Display, serif" font-size="8" fill="#A67C52" font-weight="400">BAPTISM</text>
+                </svg>
+                <span data-i18n="dashboard.brand">Baptism Blessing</span>
+            </a>
+        </div>
+        <div class="nav-links" id="navLinks">
+            <span class="user-info" id="userDisplay" data-i18n="dashboard.welcome">Welcome, Admin</span>
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="5"/>
+                    <line x1="12" y1="1" x2="12" y2="3"/>
+                    <line x1="12" y1="21" x2="12" y2="23"/>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                    <line x1="1" y1="12" x2="3" y2="12"/>
+                    <line x1="21" y1="12" x2="23" y2="12"/>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                </svg>
+                <span id="themeLabel">Light</span>
+            </button>
+            <button class="lang-toggle" id="langToggle" aria-label="Toggle language">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="2" y1="12" x2="22" y2="12"/>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                </svg>
+                <span id="langLabel">EN</span>
+            </button>
+            <button class="logout-btn" id="logoutBtn" data-i18n="dashboard.logout">Logout</button>
+        </div>
+    </nav>
+
+    <main class="dashboard-main">
+        <div class="dashboard-header">
+            <h1 data-i18n="dashboard.title">Welcome to Baptism Blessing Dashboard</h1>
+            <p data-i18n="dashboard.subtitle">Manage your invitation website content</p>
+        </div>
+
+        <div id="statusMessage" class="status-msg"></div>
+
+        <div class="dashboard-grid">
+            <!-- General Information -->
+            <div class="dashboard-card">
+                <h3>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                    <span data-i18n="dashboard.general">General Information</span>
+                </h3>
+                <form id="eventForm">
+                    <div class="form-group">
+                        <label data-i18n="dashboard.babyName">Baby Name</label>
+                        <input type="text" id="editBabyName" data-i18n-placeholder="dashboard.babyNamePlaceholder" placeholder="Baby's full name">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="dashboard.parentsNames">Parents Names</label>
+                        <input type="text" id="editParentsNames" data-i18n-placeholder="dashboard.parentsNamesPlaceholder" placeholder="Parent names (e.g., Michael & Sarah)">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="dashboard.church">Church</label>
+                        <input type="text" id="editChurch" data-i18n-placeholder="dashboard.churchPlaceholder" placeholder="Church name">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="dashboard.date">Date</label>
+                        <input type="text" id="editDate" data-i18n-placeholder="dashboard.datePlaceholder" placeholder="e.g., June 29, 2026">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="dashboard.time">Time</label>
+                        <input type="text" id="editTime" data-i18n-placeholder="dashboard.timePlaceholder" placeholder="e.g., 10:00 AM">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="dashboard.reception">Reception</label>
+                        <input type="text" id="editReception" data-i18n-placeholder="dashboard.receptionPlaceholder" placeholder="Reception venue">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="dashboard.mapLink">Google Maps Link</label>
+                        <input type="text" id="editMapLink" data-i18n-placeholder="dashboard.mapLinkPlaceholder" placeholder="Google Maps embed URL">
+                    </div>
+                    <button type="submit" class="btn btn-primary" data-i18n="dashboard.updateEvent">Update Event</button>
+                </form>
+            </div>
+
+            <!-- Timeline Management -->
+            <div class="dashboard-card">
+                <h3>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    <span data-i18n="dashboard.timelineManagement">Timeline Management</span>
+                </h3>
+                <form id="timelineForm">
+                    <div class="form-group">
+                        <label data-i18n="dashboard.timelineTitle">Title</label>
+                        <input type="text" id="timelineTitle" data-i18n-placeholder="dashboard.timelineTitlePlaceholder" placeholder="e.g., 10:00 AM - Arrival" required>
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="dashboard.timelineDesc">Description</label>
+                        <input type="text" id="timelineDesc" data-i18n-placeholder="dashboard.timelineDescPlaceholder" placeholder="Brief description">
+                    </div>
+                    <button type="submit" class="btn btn-primary" data-i18n="dashboard.addTimeline">Add Timeline Item</button>
+                </form>
+                <div style="margin-top: 1rem;">
+                    <h4 style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.5rem; transition: var(--transition);" data-i18n="dashboard.currentTimeline">Current Timeline</h4>
+                    <div class="item-list" id="timelineList">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gallery Management -->
+            <div class="dashboard-card">
+                <h3>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                    <span data-i18n="dashboard.galleryManagement">Gallery Management</span>
+                </h3>
+                <form id="galleryForm">
+                    <div class="form-group">
+                        <label data-i18n="dashboard.uploadImage">Upload Image</label>
+                        <div class="file-input-wrapper">
+                            <button class="btn btn-outline btn-sm" data-i18n="dashboard.chooseImage">Choose Image</button>
+                            <input type="file" id="galleryFile" accept="image/*" required>
+                        </div>
+                        <span id="galleryFileName" style="font-size: 0.8rem; color: var(--text-secondary); margin-left: 0.5rem; transition: var(--transition);"></span>
+                    </div>
+                    <button type="submit" class="btn btn-primary" data-i18n="dashboard.upload">Upload Image</button>
+                </form>
+                <div style="margin-top: 1rem;">
+                    <h4 style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.5rem; transition: var(--transition);" data-i18n="dashboard.currentGallery">Current Gallery</h4>
+                    <div class="item-list" id="galleryList">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Video Management -->
+            <div class="dashboard-card">
+                <h3>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="23 7 16 12 23 17 23 7"/>
+                        <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                    </svg>
+                    <span data-i18n="dashboard.videoManagement">Video Management</span>
+                </h3>
+                <form id="videoForm">
+                    <div class="form-group">
+                        <label data-i18n="dashboard.videoUrl">Video URL (YouTube embed)</label>
+                        <input type="url" id="videoUrl" data-i18n-placeholder="dashboard.videoUrlPlaceholder" placeholder="https://www.youtube.com/embed/..." required>
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="dashboard.videoTitle">Title</label>
+                        <input type="text" id="videoTitle" data-i18n-placeholder="dashboard.videoTitlePlaceholder" placeholder="Video title">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="dashboard.videoDesc">Description</label>
+                        <input type="text" id="videoDesc" data-i18n-placeholder="dashboard.videoDescPlaceholder" placeholder="Brief description">
+                    </div>
+                    <button type="submit" class="btn btn-primary" data-i18n="dashboard.addVideo">Add Video</button>
+                </form>
+                <div style="margin-top: 1rem;">
+                    <h4 style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.5rem; transition: var(--transition);" data-i18n="dashboard.currentVideos">Current Videos</h4>
+                    <div class="item-list" id="videoList">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Parents Message -->
+            <div class="dashboard-card">
+                <h3>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    <span data-i18n="dashboard.parentsMessage">Parents' Message</span>
+                </h3>
+                <form id="messageForm">
+                    <div class="form-group">
+                        <label data-i18n="dashboard.message">Message</label>
+                        <textarea id="editMessage" data-i18n-placeholder="dashboard.messagePlaceholder" placeholder="Write a heartfelt message..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" data-i18n="dashboard.updateMessage">Update Message</button>
+                </form>
+            </div>
+
+            <!-- Tools -->
+            <div class="dashboard-card">
+                <h3>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="3" y1="9" x2="21" y2="9"/>
+                        <line x1="3" y1="15" x2="21" y2="15"/>
+                        <line x1="9" y1="21" x2="9" y2="9"/>
+                    </svg>
+                    <span data-i18n="dashboard.tools">Tools</span>
+                </h3>
+                <div class="btn-group" style="margin-bottom: 1rem;">
+                    <button class="btn btn-primary" id="generateQRBtn" data-i18n="dashboard.generateQR">Generate QR Code</button>
+                    <button class="btn btn-outline" id="copyLinkBtn" data-i18n="dashboard.copyLink">Copy Invitation Link</button>
+                </div>
+                <div id="qrContainer" style="text-align: center; margin-top: 1rem; display: none;">
+                    <img id="qrCode" src="" alt="QR Code" style="max-width: 200px; border-radius: 12px; box-shadow: var(--shadow);">
+                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem; transition: var(--transition);" data-i18n="dashboard.scanQR">Scan to view the invitation</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Language translations
+        const translations = {
+            en: {
+                'dashboard.brand': 'Baptism Blessing',
+                'dashboard.welcome': 'Welcome, Admin',
+                'dashboard.logout': 'Logout',
+                'dashboard.title': 'Welcome to Baptism Blessing Dashboard',
+                'dashboard.subtitle': 'Manage your invitation website content',
+                'dashboard.general': 'General Information',
+                'dashboard.babyName': 'Baby Name',
+                'dashboard.babyNamePlaceholder': 'Baby\'s full name',
+                'dashboard.parentsNames': 'Parents Names',
+                'dashboard.parentsNamesPlaceholder': 'Parent names (e.g., Michael & Sarah)',
+                'dashboard.church': 'Church',
+                'dashboard.churchPlaceholder': 'Church name',
+                'dashboard.date': 'Date',
+                'dashboard.datePlaceholder': 'e.g., June 29, 2026',
+                'dashboard.time': 'Time',
+                'dashboard.timePlaceholder': 'e.g., 10:00 AM',
+                'dashboard.reception': 'Reception',
+                'dashboard.receptionPlaceholder': 'Reception venue',
+                'dashboard.mapLink': 'Google Maps Link',
+                'dashboard.mapLinkPlaceholder': 'Google Maps embed URL',
+                'dashboard.updateEvent': 'Update Event',
+                'dashboard.timelineManagement': 'Timeline Management',
+                'dashboard.timelineTitle': 'Title',
+                'dashboard.timelineTitlePlaceholder': 'e.g., 10:00 AM - Arrival',
+                'dashboard.timelineDesc': 'Description',
+                'dashboard.timelineDescPlaceholder': 'Brief description',
+                'dashboard.addTimeline': 'Add Timeline Item',
+                'dashboard.currentTimeline': 'Current Timeline',
+                'dashboard.galleryManagement': 'Gallery Management',
+                'dashboard.uploadImage': 'Upload Image',
+                'dashboard.chooseImage': 'Choose Image',
+                'dashboard.upload': 'Upload Image',
+                'dashboard.currentGallery': 'Current Gallery',
+                'dashboard.videoManagement': 'Video Management',
+                'dashboard.videoUrl': 'Video URL (YouTube embed)',
+                'dashboard.videoUrlPlaceholder': 'https://www.youtube.com/embed/...',
+                'dashboard.videoTitle': 'Title',
+                'dashboard.videoTitlePlaceholder': 'Video title',
+                'dashboard.videoDesc': 'Description',
+                'dashboard.videoDescPlaceholder': 'Brief description',
+                'dashboard.addVideo': 'Add Video',
+                'dashboard.currentVideos': 'Current Videos',
+                'dashboard.parentsMessage': 'Parents\' Message',
+                'dashboard.message': 'Message',
+                'dashboard.messagePlaceholder': 'Write a heartfelt message...',
+                'dashboard.updateMessage': 'Update Message',
+                'dashboard.tools': 'Tools',
+                'dashboard.generateQR': 'Generate QR Code',
+                'dashboard.copyLink': 'Copy Invitation Link',
+                'dashboard.scanQR': 'Scan to view the invitation',
+                'dashboard.delete': 'Delete',
+                'dashboard.image': 'Image',
+                'dashboard.video': 'Video'
+            },
+            ar: {
+                'dashboard.brand': 'معمودية البركة',
+                'dashboard.welcome': 'مرحباً، المدير',
+                'dashboard.logout': 'تسجيل الخروج',
+                'dashboard.title': 'مرحباً بكم في لوحة تحكم معمودية البركة',
+                'dashboard.subtitle': 'إدارة محتوى موقع دعوتكم',
+                'dashboard.general': 'المعلومات العامة',
+                'dashboard.babyName': 'اسم الطفل',
+                'dashboard.babyNamePlaceholder': 'الاسم الكامل للطفل',
+                'dashboard.parentsNames': 'أسماء الوالدين',
+                'dashboard.parentsNamesPlaceholder': 'أسماء الوالدين (مثل: مايكل وسارة)',
+                'dashboard.church': 'الكنيسة',
+                'dashboard.churchPlaceholder': 'اسم الكنيسة',
+                'dashboard.date': 'التاريخ',
+                'dashboard.datePlaceholder': 'مثل: ٢٩ يونيو ٢٠٢٦',
+                'dashboard.time': 'الوقت',
+                'dashboard.timePlaceholder': 'مثل: ١٠:٠٠ ص',
+                'dashboard.reception': 'الاستقبال',
+                'dashboard.receptionPlaceholder': 'مكان الاستقبال',
+                'dashboard.mapLink': 'رابط خرائط جوجل',
+                'dashboard.mapLinkPlaceholder': 'رابط تضمين خرائط جوجل',
+                'dashboard.updateEvent': 'تحديث الحدث',
+                'dashboard.timelineManagement': 'إدارة الجدول الزمني',
+                'dashboard.timelineTitle': 'العنوان',
+                'dashboard.timelineTitlePlaceholder': 'مثل: ١٠:٠٠ ص - الوصول',
+                'dashboard.timelineDesc': 'الوصف',
+                'dashboard.timelineDescPlaceholder': 'وصف مختصر',
+                'dashboard.addTimeline': 'إضافة عنصر للجدول الزمني',
+                'dashboard.currentTimeline': 'الجدول الزمني الحالي',
+                'dashboard.galleryManagement': 'إدارة المعرض',
+                'dashboard.uploadImage': 'رفع صورة',
+                'dashboard.chooseImage': 'اختر صورة',
+                'dashboard.upload': 'رفع الصورة',
+                'dashboard.currentGallery': 'المعرض الحالي',
+                'dashboard.videoManagement': 'إدارة الفيديوهات',
+                'dashboard.videoUrl': 'رابط الفيديو (تضمين يوتيوب)',
+                'dashboard.videoUrlPlaceholder': 'https://www.youtube.com/embed/...',
+                'dashboard.videoTitle': 'العنوان',
+                'dashboard.videoTitlePlaceholder': 'عنوان الفيديو',
+                'dashboard.videoDesc': 'الوصف',
+                'dashboard.videoDescPlaceholder': 'وصف مختصر',
+                'dashboard.addVideo': 'إضافة فيديو',
+                'dashboard.currentVideos': 'الفيديوهات الحالية',
+                'dashboard.parentsMessage': 'رسالة الوالدين',
+                'dashboard.message': 'الرسالة',
+                'dashboard.messagePlaceholder': 'اكتب رسالة من القلب...',
+                'dashboard.updateMessage': 'تحديث الرسالة',
+                'dashboard.tools': 'الأدوات',
+                'dashboard.generateQR': 'إنشاء رمز QR',
+                'dashboard.copyLink': 'نسخ رابط الدعوة',
+                'dashboard.scanQR': 'امسح لعرض الدعوة',
+                'dashboard.delete': 'حذف',
+                'dashboard.image': 'صورة',
+                'dashboard.video': 'فيديو'
+            }
+        };
+
+        let currentLang = 'en';
+        let currentTheme = 'light';
+
+        // Theme management
+        function setTheme(theme) {
+            currentTheme = theme;
+            document.documentElement.setAttribute('data-theme', theme === 'dark' ? 'dark' : 'light');
+            localStorage.setItem('theme', theme);
+            const label = document.getElementById('themeLabel');
+            label.textContent = theme === 'dark' ? 'Dark' : 'Light';
+            const btn = document.getElementById('themeToggle');
+            if (theme === 'dark') {
+                btn.innerHTML = `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                    </svg>
+                    <span id="themeLabel">Dark</span>
+                `;
+            } else {
+                btn.innerHTML = `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="5"/>
+                        <line x1="12" y1="1" x2="12" y2="3"/>
+                        <line x1="12" y1="21" x2="12" y2="23"/>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                        <line x1="1" y1="12" x2="3" y2="12"/>
+                        <line x1="21" y1="12" x2="23" y2="12"/>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                    </svg>
+                    <span id="themeLabel">Light</span>
+                `;
+            }
+        }
+
+        // Language management
+        function setLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('language', lang);
+            document.documentElement.lang = lang;
+            document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+            document.getElementById('langLabel').textContent = lang === 'ar' ? 'AR' : 'EN';
+
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang] && translations[lang][key]) {
+                    el.textContent = translations[lang][key];
+                }
+            });
+
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (translations[lang] && translations[lang][key]) {
+                    el.placeholder = translations[lang][key];
+                }
+            });
+        }
+
+        // Toggle theme
+        document.getElementById('themeToggle').addEventListener('click', function() {
+            setTheme(currentTheme === 'light' ? 'dark' : 'light');
+        });
+
+        // Toggle language
+        document.getElementById('langToggle').addEventListener('click', function() {
+            setLanguage(currentLang === 'en' ? 'ar' : 'en');
+        });
+
+        // Load saved preferences
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        const savedLang = localStorage.getItem('language') || 'en';
+        setTheme(savedTheme);
+        setLanguage(savedLang);
+
+        // Get token
+        function getToken() {
+            return localStorage.getItem('token');
+        }
+
+        // Check authentication
+        const token = getToken();
+        if (!token) {
+            window.location.href = '/login.html';
+        }
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', async function() {
+            try {
+                await fetch('/api/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+            } catch (e) {}
+            localStorage.removeItem('token');
+            localStorage.removeItem('rememberMe');
+            window.location.href = '/login.html';
+        });
+
+        // Hamburger menu
+        document.getElementById('hamburger').addEventListener('click', function() {
+            document.getElementById('navLinks').classList.toggle('active');
+        });
+
+        // Show status message
+        function showStatus(message, type = 'success') {
+            const el = document.getElementById('statusMessage');
+            el.textContent = message;
+            el.className = 'status-msg ' + type;
+            setTimeout(() => {
+                el.className = 'status-msg';
+            }, 5000);
+        }
+
+        // Fetch and display event data
+        async function loadEventData() {
+            try {
+                const response = await fetch('/api/event', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data) {
+                        document.getElementById('editBabyName').value = data.babyName || '';
+                        document.getElementById('editParentsNames').value = data.parentsNames || '';
+                        document.getElementById('editChurch').value = data.church || '';
+                        document.getElementById('editDate').value = data.date || '';
+                        document.getElementById('editTime').value = data.time || '';
+                        document.getElementById('editReception').value = data.reception || '';
+                        document.getElementById('editMapLink').value = data.mapLink || '';
+                        document.getElementById('editMessage').value = data.parentsMessage || '';
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading event data:', error);
+            }
+        }
+
+        loadEventData();
+
+        // Update event
+        document.getElementById('eventForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const data = {
+                babyName: document.getElementById('editBabyName').value,
+                parentsNames: document.getElementById('editParentsNames').value,
+                church: document.getElementById('editChurch').value,
+                date: document.getElementById('editDate').value,
+                time: document.getElementById('editTime').value,
+                reception: document.getElementById('editReception').value,
+                mapLink: document.getElementById('editMapLink').value,
+            };
+
+            try {
+                const response = await fetch('/api/event', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    body: JSON.stringify(data),
+                });
+                if (response.ok) {
+                    showStatus(currentLang === 'ar' ? 'تم تحديث معلومات الحدث بنجاح!' : 'Event information updated successfully!');
+                } else {
+                    showStatus(currentLang === 'ar' ? 'فشل في تحديث معلومات الحدث.' : 'Failed to update event information.', 'error');
+                }
+            } catch (error) {
+                showStatus(currentLang === 'ar' ? 'خطأ في الشبكة. يرجى المحاولة مرة أخرى.' : 'Network error. Please try again.', 'error');
+            }
+        });
+
+        // Update message
+        document.getElementById('messageForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const message = document.getElementById('editMessage').value;
+
+            try {
+                const response = await fetch('/api/event', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ parentsMessage: message }),
+                });
+                if (response.ok) {
+                    showStatus(currentLang === 'ar' ? 'تم تحديث الرسالة بنجاح!' : 'Message updated successfully!');
+                } else {
+                    showStatus(currentLang === 'ar' ? 'فشل في تحديث الرسالة.' : 'Failed to update message.', 'error');
+                }
+            } catch (error) {
+                showStatus(currentLang === 'ar' ? 'خطأ في الشبكة. يرجى المحاولة مرة أخرى.' : 'Network error. Please try again.', 'error');
+            }
+        });
+
+        // Load timeline
+        async function loadTimeline() {
+            try {
+                const response = await fetch('/api/timeline', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+                if (response.ok) {
+                    const items = await response.json();
+                    const list = document.getElementById('timelineList');
+                    list.innerHTML = '';
+                    const deleteLabel = currentLang === 'ar' ? 'حذف' : 'Delete';
+                    items.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = 'item';
+                        div.innerHTML = `
+                            <div>
+                                <strong>${item.title}</strong>
+                                <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0; transition: var(--transition);">${item.description || ''}</p>
+                            </div>
+                            <div class="item-actions">
+                                <button class="btn btn-danger btn-sm delete-timeline" data-id="${item.id}">${deleteLabel}</button>
+                            </div>
+                        `;
+                        list.appendChild(div);
+                    });
+                    document.querySelectorAll('.delete-timeline').forEach(btn => {
+                        btn.addEventListener('click', async function() {
+                            const id = this.dataset.id;
+                            const confirmMsg = currentLang === 'ar' ? 'حذف هذا العنصر من الجدول الزمني؟' : 'Delete this timeline item?';
+                            if (confirm(confirmMsg)) {
+                                try {
+                                    const response = await fetch(`/api/timeline/${id}`, {
+                                        method: 'DELETE',
+                                        headers: {
+                                            'Authorization': `Bearer ${token}`,
+                                        },
+                                    });
+                                    if (response.ok) {
+                                        showStatus(currentLang === 'ar' ? 'تم حذف عنصر الجدول الزمني.' : 'Timeline item deleted.');
+                                        loadTimeline();
+                                    }
+                                } catch (error) {
+                                    showStatus(currentLang === 'ar' ? 'خطأ في حذف عنصر الجدول الزمني.' : 'Error deleting timeline item.', 'error');
+                                }
+                            }
+                        });
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading timeline:', error);
+            }
+        }
+
+        loadTimeline();
+
+        // Add timeline item
+        document.getElementById('timelineForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const title = document.getElementById('timelineTitle').value;
+            const description = document.getElementById('timelineDesc').value;
+
+            try {
+                const response = await fetch('/api/timeline', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ title, description }),
+                });
+                if (response.ok) {
+                    showStatus(currentLang === 'ar' ? 'تم إضافة عنصر الجدول الزمني!' : 'Timeline item added!');
+                    document.getElementById('timelineTitle').value = '';
+                    document.getElementById('timelineDesc').value = '';
+                    loadTimeline();
+                } else {
+                    showStatus(currentLang === 'ar' ? 'فشل في إضافة عنصر الجدول الزمني.' : 'Failed to add timeline item.', 'error');
+                }
+            } catch (error) {
+                showStatus(currentLang === 'ar' ? 'خطأ في الشبكة. يرجى المحاولة مرة أخرى.' : 'Network error. Please try again.', 'error');
+            }
+        });
+
+        // Load gallery
+        async function loadGallery() {
+            try {
+                const response = await fetch('/api/gallery', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+                if (response.ok) {
+                    const items = await response.json();
+                    const list = document.getElementById('galleryList');
+                    list.innerHTML = '';
+                    const deleteLabel = currentLang === 'ar' ? 'حذف' : 'Delete';
+                    const imageLabel = currentLang === 'ar' ? 'صورة' : 'Image';
+                    items.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = 'item';
+                        div.innerHTML = `
+                            <div style="display: flex; align-items: center; gap: 1rem;">
+                                <img src="${item.url}" alt="${item.title || imageLabel}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
+                                <span style="font-size: 0.9rem;">${item.title || imageLabel}</span>
+                            </div>
+                            <div class="item-actions">
+                                <button class="btn btn-danger btn-sm delete-gallery" data-id="${item.id}">${deleteLabel}</button>
+                            </div>
+                        `;
+                        list.appendChild(div);
+                    });
+                    document.querySelectorAll('.delete-gallery').forEach(btn => {
+                        btn.addEventListener('click', async function() {
+                            const id = this.dataset.id;
+                            const confirmMsg = currentLang === 'ar' ? 'حذف هذه الصورة؟' : 'Delete this image?';
+                            if (confirm(confirmMsg)) {
+                                try {
+                                    const response = await fetch(`/api/gallery/${id}`, {
+                                        method: 'DELETE',
+                                        headers: {
+                                            'Authorization': `Bearer ${token}`,
+                                        },
+                                    });
+                                    if (response.ok) {
+                                        showStatus(currentLang === 'ar' ? 'تم حذف الصورة.' : 'Image deleted.');
+                                        loadGallery();
+                                    }
+                                } catch (error) {
+                                    showStatus(currentLang === 'ar' ? 'خطأ في حذف الصورة.' : 'Error deleting image.', 'error');
+                                }
+                            }
+                        });
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading gallery:', error);
+            }
+        }
+
+        loadGallery();
+
+        // Upload gallery image
+        document.getElementById('galleryForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const fileInput = document.getElementById('galleryFile');
+            const file = fileInput.files[0];
+            if (!file) {
+                showStatus(currentLang === 'ar' ? 'يرجى اختيار صورة.' : 'Please select an image.', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('image', file);
+
+            try {
+                const response = await fetch('/api/gallery', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    body: formData,
+                });
+                if (response.ok) {
+                    showStatus(currentLang === 'ar' ? 'تم رفع الصورة بنجاح!' : 'Image uploaded successfully!');
+                    fileInput.value = '';
+                    document.getElementById('galleryFileName').textContent = '';
+                    loadGallery();
+                } else {
+                    showStatus(currentLang === 'ar' ? 'فشل في رفع الصورة.' : 'Failed to upload image.', 'error');
+                }
+            } catch (error) {
+                showStatus(currentLang === 'ar' ? 'خطأ في الشبكة. يرجى المحاولة مرة أخرى.' : 'Network error. Please try again.', 'error');
+            }
+        });
+
+        document.getElementById('galleryFile').addEventListener('change', function() {
+            const fileName = this.files[0]?.name || '';
+            document.getElementById('galleryFileName').textContent = fileName;
+        });
+
+        // Load videos
+        async function loadVideos() {
+            try {
+                const response = await fetch('/api/videos', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+                if (response.ok) {
+                    const items = await response.json();
+                    const list = document.getElementById('videoList');
+                    list.innerHTML = '';
+                    const deleteLabel = currentLang === 'ar' ? 'حذف' : 'Delete';
+                    const videoLabel = currentLang === 'ar' ? 'فيديو' : 'Video';
+                    items.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = 'item';
+                        div.innerHTML = `
+                            <div>
+                                <strong>${item.title || videoLabel}</strong>
+                                <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0; transition: var(--transition);">${item.description || ''}</p>
+                            </div>
+                            <div class="item-actions">
+                                <button class="btn btn-danger btn-sm delete-video" data-id="${item.id}">${deleteLabel}</button>
+                            </div>
+                        `;
+                        list.appendChild(div);
+                    });
+                    document.querySelectorAll('.delete-video').forEach(btn => {
+                        btn.addEventListener('click', async function() {
+                            const id = this.dataset.id;
+                            const confirmMsg = currentLang === 'ar' ? 'حذف هذا الفيديو؟' : 'Delete this video?';
+                            if (confirm(confirmMsg)) {
+                                try {
+                                    const response = await fetch(`/api/video/${id}`, {
+                                        method: 'DELETE',
+                                        headers: {
+                                            'Authorization': `Bearer ${token}`,
+                                        },
+                                    });
+                                    if (response.ok) {
+                                        showStatus(currentLang === 'ar' ? 'تم حذف الفيديو.' : 'Video deleted.');
+                                        loadVideos();
+                                    }
+                                } catch (error) {
+                                    showStatus(currentLang === 'ar' ? 'خطأ في حذف الفيديو.' : 'Error deleting video.', 'error');
+                                }
+                            }
+                        });
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading videos:', error);
+            }
+        }
+
+        loadVideos();
+
+        // Add video
+        document.getElementById('videoForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const url = document.getElementById('videoUrl').value;
+            const title = document.getElementById('videoTitle').value;
+            const description = document.getElementById('videoDesc').value;
+
+            try {
+                const response = await fetch('/api/video', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ url, title, description }),
+                });
+                if (response.ok) {
+                    showStatus(currentLang === 'ar' ? 'تم إضافة الفيديو بنجاح!' : 'Video added successfully!');
+                    document.getElementById('videoUrl').value = '';
+                    document.getElementById('videoTitle').value = '';
+                    document.getElementById('videoDesc').value = '';
+                    loadVideos();
+                } else {
+                    showStatus(currentLang === 'ar' ? 'فشل في إضافة الفيديو.' : 'Failed to add video.', 'error');
+                }
+            } catch (error) {
+                showStatus(currentLang === 'ar' ? 'خطأ في الشبكة. يرجى المحاولة مرة أخرى.' : 'Network error. Please try again.', 'error');
+            }
+        });
+
+        // Generate QR Code
+        document.getElementById('generateQRBtn').addEventListener('click', function() {
+            const container = document.getElementById('qrContainer');
+            const qrImg = document.getElementById('qrCode');
+            const url = window.location.origin;
+            qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(url)}`;
+            container.style.display = 'block';
+        });
+
+        // Copy invitation link
+        document.getElementById('copyLinkBtn').addEventListener('click', function() {
+            const url = window.location.origin;
+            navigator.clipboard.writeText(url).then(() => {
+                showStatus(currentLang === 'ar' ? 'تم نسخ رابط الدعوة!' : 'Invitation link copied to clipboard!');
+            }).catch(() => {
+                const input = document.createElement('input');
+                input.value = url;
+                document.body.appendChild(input);
+                input.select();
+                document.execCommand('copy');
+                document.body.removeChild(input);
+                showStatus(currentLang === 'ar' ? 'تم نسخ رابط الدعوة!' : 'Invitation link copied to clipboard!');
+            });
+        });
+
+        // Verify token on load
+        fetch('/api/event', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        }).then(response => {
+            if (!response.ok) {
+                localStorage.removeItem('token');
+                window.location.href = '/login.html';
+            }
+        }).catch(() => {
+            localStorage.removeItem('token');
+            window.location.href = '/login.html';
+        });
+    </script>
+</body>
+</html>
