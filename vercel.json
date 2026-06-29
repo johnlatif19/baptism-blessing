@@ -26,11 +26,11 @@
     },
     {
       "src": "/gallery",
-      "dest": "/public/photo.html"
+      "dest": "/public/gallery.html"
     },
     {
       "src": "/videos",
-      "dest": "/public/video.html"
+      "dest": "/public/videos.html"
     },
     {
       "src": "/",
