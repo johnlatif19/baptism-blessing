@@ -395,63 +395,36 @@ app.get('/api/videos', async (req, res) => {
 });
 
 // POST upload video with extended timeout
-app.post('/api/video', authenticateToken, upload.single('video'), async (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ message: 'No video file provided' });
-  }
-
-  // Check file size before upload
-  if (req.file.size > 500 * 1024 * 1024) {
-    return res.status(413).json({ message: 'File too large. Maximum size is 500MB' });
-  }
-
-  try {
-    // Upload video to Cloudinary with extended timeout
-    const result = await new Promise((resolve, reject) => {
-      const uploadStream = cloudinary.uploader.upload_stream(
-        {
-          folder: 'baptism-blessing/videos',
-          resource_type: 'video',
-          public_id: `video_${uuidv4()}`,
-          transformation: [
-            { quality: 'auto' }
-          ],
-          timeout: 600000 // 10 دقائق timeout
-        },
-        (error, result) => {
-          if (error) reject(error);
-          else resolve(result);
-        }
-      );
-      uploadStream.end(req.file.buffer);
-    });
-
-    const videoData = {
-      url: result.secure_url,
-      publicId: result.public_id,
-      title: req.body.title || 'Video',
-      description: req.body.description || '',
-      createdAt: admin.firestore.FieldValue.serverTimestamp()
-    };
-
-    const docRef = await db.collection('videos').add(videoData);
-    res.status(201).json({ 
-      message: 'Video uploaded successfully',
-      id: docRef.id,
-      url: result.secure_url,
-      publicId: result.public_id,
-      title: videoData.title,
-      description: videoData.description
-    });
-  } catch (error) {
-    console.error('Error uploading video:', error);
-    // رسالة خطأ أوضح
-    if (error.message && error.message.includes('timeout')) {
-      res.status(504).json({ message: 'Upload timeout. Please try again with a smaller file.' });
-    } else {
-      res.status(500).json({ message: 'Error uploading video: ' + error.message });
+app.post('/api/video', authenticateToken, [
+    body('url').isURL().withMessage('Valid URL is required'),
+    body('publicId').optional().isString(),
+    body('title').optional().isString().trim(),
+    body('description').optional().isString().trim()
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ message: errors.array()[0].msg });
     }
-  }
+
+    try {
+        const videoData = {
+            url: req.body.url,
+            publicId: req.body.publicId || '',
+            title: req.body.title || 'Video',
+            description: req.body.description || '',
+            createdAt: admin.firestore.FieldValue.serverTimestamp()
+        };
+
+        const docRef = await db.collection('videos').add(videoData);
+        res.status(201).json({ 
+            message: 'Video added successfully',
+            id: docRef.id,
+            ...videoData
+        });
+    } catch (error) {
+        console.error('Error saving video:', error);
+        res.status(500).json({ message: 'Error saving video' });
+    }
 });
 
 // DELETE video
