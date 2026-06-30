@@ -236,6 +236,7 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            z-index: 10;
         }
 
         .gallery-item:hover .download-btn {
@@ -337,6 +338,7 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            z-index: 10;
         }
 
         .lightbox-download:hover {
@@ -550,6 +552,26 @@
         setTheme(savedTheme);
         setLanguage(savedLang);
 
+        // Download function
+        function downloadFile(url, filename) {
+            // Use fetch to get the file as blob
+            fetch(url)
+                .then(response => response.blob())
+                .then(blob => {
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = filename || url.split('/').pop() || 'download';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(link.href);
+                })
+                .catch(err => {
+                    // Fallback: open in new tab
+                    window.open(url, '_blank');
+                });
+        }
+
         // Lightbox functions
         function openLightbox(src) {
             currentImageUrl = src;
@@ -572,16 +594,11 @@
             if (e.key === 'Escape') closeLightbox();
         });
 
-        // Download image
+        // Download from lightbox
         document.getElementById('lightboxDownload').addEventListener('click', function() {
             if (currentImageUrl) {
-                const link = document.createElement('a');
-                link.href = currentImageUrl;
-                link.download = currentImageUrl.split('/').pop() || 'image.jpg';
-                link.target = '_blank';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
+                const filename = currentImageUrl.split('/').pop().split('?')[0] || 'image.jpg';
+                downloadFile(currentImageUrl, filename);
             }
         });
 
@@ -614,13 +631,8 @@
                             downloadBtn.innerHTML = '⬇ Download';
                             downloadBtn.addEventListener('click', function(e) {
                                 e.stopPropagation();
-                                const link = document.createElement('a');
-                                link.href = img.url;
-                                link.download = img.url.split('/').pop() || 'image.jpg';
-                                link.target = '_blank';
-                                document.body.appendChild(link);
-                                link.click();
-                                document.body.removeChild(link);
+                                const filename = img.url.split('/').pop().split('?')[0] || 'image.jpg';
+                                downloadFile(img.url, filename);
                             });
                             
                             item.appendChild(imgEl);
