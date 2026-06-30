@@ -196,6 +196,7 @@
             overflow: hidden;
             box-shadow: var(--shadow);
             transition: var(--transition);
+            position: relative;
         }
 
         .video-card:hover {
@@ -209,6 +210,35 @@
             background: #000;
             border: none;
             display: block;
+        }
+
+        .video-card .download-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            opacity: 0;
+            transition: var(--transition);
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            z-index: 10;
+        }
+
+        .video-card:hover .download-btn {
+            opacity: 1;
+        }
+
+        .video-card .download-btn:hover {
+            background: var(--gold);
+            color: var(--text-dark);
         }
 
         .video-card-content {
@@ -286,6 +316,14 @@
             .video-grid {
                 grid-template-columns: 1fr;
             }
+
+            .video-card .download-btn {
+                opacity: 1;
+                top: 0.5rem;
+                right: 0.5rem;
+                padding: 0.3rem 0.7rem;
+                font-size: 0.7rem;
+            }
         }
     </style>
 </head>
@@ -336,7 +374,6 @@
     <footer class="footer">
         <div class="footer-logo">Baptism Blessing</div>
         <p>Baptism Blessing © 2026</p>
-        <p><span data-i18n="footer.made">Made with</span> <span class="heart">❤️</span> <span data-i18n="footer.for">for celebrating God's blessings.</span></p>
     </footer>
 
     <script>
@@ -347,16 +384,12 @@
                 'video.gallery': 'Gallery',
                 'video.empty': 'No videos yet',
                 'video.emptySub': 'Videos will be added after the baptism ceremony',
-                'footer.made': 'Made with',
-                'footer.for': 'for celebrating God\'s blessings.'
             },
             ar: {
                 'video.title': 'معرض',
                 'video.gallery': 'الفيديوهات',
                 'video.empty': 'لا توجد فيديوهات بعد',
                 'video.emptySub': 'سيتم إضافة الفيديوهات بعد حفل المعمودية',
-                'footer.made': 'صنع بـ',
-                'footer.for': 'للاحتفال ببركات الله.'
             }
         };
 
@@ -423,6 +456,24 @@
         setTheme(savedTheme);
         setLanguage(savedLang);
 
+        // Download function
+        function downloadFile(url, filename) {
+            fetch(url)
+                .then(response => response.blob())
+                .then(blob => {
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = filename || url.split('/').pop().split('?')[0] || 'video.mp4';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(link.href);
+                })
+                .catch(err => {
+                    window.open(url, '_blank');
+                });
+        }
+
         // Load videos
         async function loadVideos() {
             try {
@@ -444,6 +495,15 @@
                             videoEl.preload = 'metadata';
                             videoEl.poster = video.poster || '';
                             
+                            const downloadBtn = document.createElement('button');
+                            downloadBtn.className = 'download-btn';
+                            downloadBtn.innerHTML = '⬇ Download';
+                            downloadBtn.addEventListener('click', function(e) {
+                                e.stopPropagation();
+                                const filename = video.url.split('/').pop().split('?')[0] || 'video.mp4';
+                                downloadFile(video.url, filename);
+                            });
+                            
                             const content = document.createElement('div');
                             content.className = 'video-card-content';
                             const title = document.createElement('h4');
@@ -452,7 +512,9 @@
                             desc.textContent = video.description || '';
                             content.appendChild(title);
                             content.appendChild(desc);
+                            
                             card.appendChild(videoEl);
+                            card.appendChild(downloadBtn);
                             card.appendChild(content);
                             grid.appendChild(card);
                         });
