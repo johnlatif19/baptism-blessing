@@ -417,47 +417,6 @@
             border-radius: 2px;
         }
 
-        /* Two columns layout for language versions */
-        .lang-columns {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-        }
-
-        .lang-column {
-            background: var(--bg-primary);
-            border-radius: 16px;
-            padding: 1rem;
-            border: 1px solid var(--border-color);
-            transition: var(--transition);
-        }
-
-        .lang-column h4 {
-            font-family: 'Playfair Display', serif;
-            font-size: 1rem;
-            color: var(--gold-dark);
-            margin-bottom: 0.75rem;
-            text-align: center;
-            border-bottom: 2px solid var(--gold);
-            padding-bottom: 0.5rem;
-        }
-
-        /* Video preview styles */
-        .video-preview {
-            margin-top: 0.5rem;
-            width: 100%;
-            max-width: 100%;
-            border-radius: 8px;
-            overflow: hidden;
-            background: #000;
-        }
-
-        .video-preview video {
-            width: 100%;
-            max-height: 150px;
-            border-radius: 8px;
-        }
-
         .file-info {
             font-size: 0.75rem;
             color: var(--text-gold);
@@ -497,11 +456,6 @@
             .dashboard-nav .nav-left {
                 width: 100%;
                 justify-content: space-between;
-            }
-
-            .lang-columns {
-                grid-template-columns: 1fr;
-                gap: 1rem;
             }
         }
 
@@ -587,91 +541,6 @@
         <div id="statusMessage" class="status-msg"></div>
 
         <div class="dashboard-grid">
-            <!-- General Information - Two Columns -->
-            <div class="dashboard-card" style="grid-column: 1 / -1;">
-                <h3>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                        <circle cx="12" cy="7" r="4"/>
-                    </svg>
-                    <span data-i18n="dashboard.general">General Information</span>
-                </h3>
-                
-                <div class="lang-columns">
-                    <!-- English Column -->
-                    <div class="lang-column">
-                        <h4>🇬🇧 English</h4>
-                        <form id="eventFormEn">
-                            <div class="form-group">
-                                <label>Baby Name</label>
-                                <input type="text" id="editBabyNameEn" placeholder="Baby's full name">
-                            </div>
-                            <div class="form-group">
-                                <label>Parents Names</label>
-                                <input type="text" id="editParentsNamesEn" placeholder="Parent names (e.g., Michael & Sarah)">
-                            </div>
-                            <div class="form-group">
-                                <label>Church</label>
-                                <input type="text" id="editChurchEn" placeholder="Church name">
-                            </div>
-                            <div class="form-group">
-                                <label>Date</label>
-                                <input type="text" id="editDateEn" placeholder="e.g., June 29, 2026">
-                            </div>
-                            <div class="form-group">
-                                <label>Time</label>
-                                <input type="text" id="editTimeEn" placeholder="e.g., 10:00 AM">
-                            </div>
-                            <div class="form-group">
-                                <label>Reception</label>
-                                <input type="text" id="editReceptionEn" placeholder="Reception venue">
-                            </div>
-                            <div class="form-group">
-                                <label>Google Maps Link</label>
-                                <input type="text" id="editMapLinkEn" placeholder="Google Maps embed URL">
-                            </div>
-                            <button type="submit" class="btn btn-primary" style="width: 100%;">Update Event (EN)</button>
-                        </form>
-                    </div>
-
-                    <!-- Arabic Column -->
-                    <div class="lang-column">
-                        <h4>🇸🇦 العربية</h4>
-                        <form id="eventFormAr">
-                            <div class="form-group">
-                                <label>اسم الطفل</label>
-                                <input type="text" id="editBabyNameAr" placeholder="الاسم الكامل للطفل">
-                            </div>
-                            <div class="form-group">
-                                <label>أسماء الوالدين</label>
-                                <input type="text" id="editParentsNamesAr" placeholder="أسماء الوالدين (مثل: مايكل وسارة)">
-                            </div>
-                            <div class="form-group">
-                                <label>الكنيسة</label>
-                                <input type="text" id="editChurchAr" placeholder="اسم الكنيسة">
-                            </div>
-                            <div class="form-group">
-                                <label>التاريخ</label>
-                                <input type="text" id="editDateAr" placeholder="مثل: ٢٩ يونيو ٢٠٢٦">
-                            </div>
-                            <div class="form-group">
-                                <label>الوقت</label>
-                                <input type="text" id="editTimeAr" placeholder="مثل: ١٠:٠٠ ص">
-                            </div>
-                            <div class="form-group">
-                                <label>الاستقبال</label>
-                                <input type="text" id="editReceptionAr" placeholder="مكان الاستقبال">
-                            </div>
-                            <div class="form-group">
-                                <label>رابط خرائط جوجل</label>
-                                <input type="text" id="editMapLinkAr" placeholder="رابط تضمين خرائط جوجل">
-                            </div>
-                            <button type="submit" class="btn btn-primary" style="width: 100%;">تحديث الحدث (AR)</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
             <!-- Gallery Management -->
             <div class="dashboard-card">
                 <h3>
@@ -732,42 +601,6 @@
                 </div>
             </div>
 
-            <!-- Parents Message - Two Columns -->
-            <div class="dashboard-card" style="grid-column: 1 / -1;">
-                <h3>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                    </svg>
-                    <span data-i18n="dashboard.parentsMessage">Parents' Message</span>
-                </h3>
-                
-                <div class="lang-columns">
-                    <!-- English Message Column -->
-                    <div class="lang-column">
-                        <h4>🇬🇧 English</h4>
-                        <form id="messageFormEn">
-                            <div class="form-group">
-                                <label>Message (English)</label>
-                                <textarea id="editMessageEn" placeholder="Write a heartfelt message in English..." rows="4"></textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary" style="width: 100%;">Update Message (EN)</button>
-                        </form>
-                    </div>
-
-                    <!-- Arabic Message Column -->
-                    <div class="lang-column">
-                        <h4>🇸🇦 العربية</h4>
-                        <form id="messageFormAr">
-                            <div class="form-group">
-                                <label>الرسالة (بالعربية)</label>
-                                <textarea id="editMessageAr" placeholder="اكتب رسالة من القلب بالعربية..." rows="4"></textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary" style="width: 100%;">تحديث الرسالة (AR)</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
             <!-- Tools -->
             <div class="dashboard-card">
                 <h3>
@@ -800,7 +633,6 @@
                 'dashboard.logout': 'Logout',
                 'dashboard.title': 'Welcome to Baptism Blessing Dashboard',
                 'dashboard.subtitle': 'Manage your invitation website content',
-                'dashboard.general': 'General Information',
                 'dashboard.galleryManagement': 'Gallery Management',
                 'dashboard.uploadImage': 'Upload Image',
                 'dashboard.chooseImage': 'Choose Image',
@@ -814,7 +646,6 @@
                 'dashboard.videoDescPlaceholder': 'Brief description',
                 'dashboard.uploadVideo': 'Upload Video',
                 'dashboard.currentVideos': 'Current Videos',
-                'dashboard.parentsMessage': 'Parents\' Message',
                 'dashboard.tools': 'Tools',
                 'dashboard.generateQR': 'Generate QR Code',
                 'dashboard.copyLink': 'Copy Invitation Link',
@@ -829,7 +660,6 @@
                 'dashboard.logout': 'تسجيل الخروج',
                 'dashboard.title': 'مرحباً بكم في لوحة تحكم معمودية البركة',
                 'dashboard.subtitle': 'إدارة محتوى موقع دعوتكم',
-                'dashboard.general': 'المعلومات العامة',
                 'dashboard.galleryManagement': 'إدارة المعرض',
                 'dashboard.uploadImage': 'رفع صورة',
                 'dashboard.chooseImage': 'اختر صورة',
@@ -843,7 +673,6 @@
                 'dashboard.videoDescPlaceholder': 'وصف مختصر',
                 'dashboard.uploadVideo': 'رفع الفيديو',
                 'dashboard.currentVideos': 'الفيديوهات الحالية',
-                'dashboard.parentsMessage': 'رسالة الوالدين',
                 'dashboard.tools': 'الأدوات',
                 'dashboard.generateQR': 'إنشاء رمز QR',
                 'dashboard.copyLink': 'نسخ رابط الدعوة',
@@ -851,30 +680,6 @@
                 'dashboard.delete': 'حذف',
                 'dashboard.image': 'صورة',
                 'dashboard.video': 'فيديو'
-            }
-        };
-
-        // Default data from index.html
-        const defaultData = {
-            en: {
-                babyName: 'Mikal Mina',
-                parentsNames: 'Mina & Mariam',
-                church: 'Monastery of Saint Bishoy',
-                date: 'Saturday, July 4, 2026',
-                time: '6:00 AM',
-                reception: 'Anba Bishoy Monastery Road, Wadi El Natrun',
-                mapLink: 'https://maps.app.goo.gl/a6TVWifecD19cr9s9',
-                parentsMessage: '"We are delighted and honored by your presence to celebrate the Holy Sacrament of Baptism of our precious child Mikal Mina"'
-            },
-            ar: {
-                babyName: 'ميكال مينا',
-                parentsNames: 'مينا ومريم',
-                church: 'دير الأنبا بيشوي',
-                date: 'السبت، 4 يوليو 2026',
-                time: '6:00 صباحاً',
-                reception: 'طريق دير الأنبا بيشوي، وادي النطرون',
-                mapLink: 'https://maps.app.goo.gl/a6TVWifecD19cr9s9',
-                parentsMessage: '"يسعدنا ويشرفنا حضوركم للاحتفال بسر المعمودية المقدسة لطفلتنا الغالية ميكال مينا"'
             }
         };
 
@@ -993,205 +798,6 @@
                 el.className = 'status-msg';
             }, 5000);
         }
-
-        // Load data from Firestore or use default
-        async function loadAllData() {
-            try {
-                const response = await fetch('/api/event', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                    },
-                });
-                
-                let data = null;
-                if (response.ok) {
-                    data = await response.json();
-                }
-
-                // If no data in Firestore, use default data from index.html
-                if (!data || Object.keys(data).length === 0) {
-                    data = {
-                        babyName: defaultData.en.babyName,
-                        parentsNames: defaultData.en.parentsNames,
-                        church: defaultData.en.church,
-                        date: defaultData.en.date,
-                        time: defaultData.en.time,
-                        reception: defaultData.en.reception,
-                        mapLink: defaultData.en.mapLink,
-                        parentsMessage: defaultData.en.parentsMessage,
-                        babyNameAr: defaultData.ar.babyName,
-                        parentsNamesAr: defaultData.ar.parentsNames,
-                        churchAr: defaultData.ar.church,
-                        dateAr: defaultData.ar.date,
-                        timeAr: defaultData.ar.time,
-                        receptionAr: defaultData.ar.reception,
-                        mapLinkAr: defaultData.ar.mapLink,
-                        parentsMessageAr: defaultData.ar.parentsMessage
-                    };
-                }
-
-                // Fill English fields
-                document.getElementById('editBabyNameEn').value = data.babyName || defaultData.en.babyName;
-                document.getElementById('editParentsNamesEn').value = data.parentsNames || defaultData.en.parentsNames;
-                document.getElementById('editChurchEn').value = data.church || defaultData.en.church;
-                document.getElementById('editDateEn').value = data.date || defaultData.en.date;
-                document.getElementById('editTimeEn').value = data.time || defaultData.en.time;
-                document.getElementById('editReceptionEn').value = data.reception || defaultData.en.reception;
-                document.getElementById('editMapLinkEn').value = data.mapLink || defaultData.en.mapLink;
-                document.getElementById('editMessageEn').value = data.parentsMessage || defaultData.en.parentsMessage;
-
-                // Fill Arabic fields
-                document.getElementById('editBabyNameAr').value = data.babyNameAr || defaultData.ar.babyName;
-                document.getElementById('editParentsNamesAr').value = data.parentsNamesAr || defaultData.ar.parentsNames;
-                document.getElementById('editChurchAr').value = data.churchAr || defaultData.ar.church;
-                document.getElementById('editDateAr').value = data.dateAr || defaultData.ar.date;
-                document.getElementById('editTimeAr').value = data.timeAr || defaultData.ar.time;
-                document.getElementById('editReceptionAr').value = data.receptionAr || defaultData.ar.reception;
-                document.getElementById('editMapLinkAr').value = data.mapLinkAr || defaultData.ar.mapLink;
-                document.getElementById('editMessageAr').value = data.parentsMessageAr || defaultData.ar.parentsMessage;
-
-            } catch (error) {
-                console.error('Error loading data:', error);
-                // Use default data if fetch fails
-                fillDefaultData();
-            }
-        }
-
-        function fillDefaultData() {
-            document.getElementById('editBabyNameEn').value = defaultData.en.babyName;
-            document.getElementById('editParentsNamesEn').value = defaultData.en.parentsNames;
-            document.getElementById('editChurchEn').value = defaultData.en.church;
-            document.getElementById('editDateEn').value = defaultData.en.date;
-            document.getElementById('editTimeEn').value = defaultData.en.time;
-            document.getElementById('editReceptionEn').value = defaultData.en.reception;
-            document.getElementById('editMapLinkEn').value = defaultData.en.mapLink;
-            document.getElementById('editMessageEn').value = defaultData.en.parentsMessage;
-
-            document.getElementById('editBabyNameAr').value = defaultData.ar.babyName;
-            document.getElementById('editParentsNamesAr').value = defaultData.ar.parentsNames;
-            document.getElementById('editChurchAr').value = defaultData.ar.church;
-            document.getElementById('editDateAr').value = defaultData.ar.date;
-            document.getElementById('editTimeAr').value = defaultData.ar.time;
-            document.getElementById('editReceptionAr').value = defaultData.ar.reception;
-            document.getElementById('editMapLinkAr').value = defaultData.ar.mapLink;
-            document.getElementById('editMessageAr').value = defaultData.ar.parentsMessage;
-        }
-
-        // Update Event (English)
-        document.getElementById('eventFormEn').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const data = {
-                babyName: document.getElementById('editBabyNameEn').value,
-                parentsNames: document.getElementById('editParentsNamesEn').value,
-                church: document.getElementById('editChurchEn').value,
-                date: document.getElementById('editDateEn').value,
-                time: document.getElementById('editTimeEn').value,
-                reception: document.getElementById('editReceptionEn').value,
-                mapLink: document.getElementById('editMapLinkEn').value,
-            };
-
-            try {
-                const response = await fetch('/api/event', {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`,
-                    },
-                    body: JSON.stringify(data),
-                });
-                if (response.ok) {
-                    showStatus('Event information updated successfully!');
-                    loadAllData();
-                } else {
-                    showStatus('Failed to update event information.', 'error');
-                }
-            } catch (error) {
-                showStatus('Network error. Please try again.', 'error');
-            }
-        });
-
-        // Update Event (Arabic)
-        document.getElementById('eventFormAr').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const data = {
-                babyNameAr: document.getElementById('editBabyNameAr').value,
-                parentsNamesAr: document.getElementById('editParentsNamesAr').value,
-                churchAr: document.getElementById('editChurchAr').value,
-                dateAr: document.getElementById('editDateAr').value,
-                timeAr: document.getElementById('editTimeAr').value,
-                receptionAr: document.getElementById('editReceptionAr').value,
-                mapLinkAr: document.getElementById('editMapLinkAr').value,
-            };
-
-            try {
-                const response = await fetch('/api/event', {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`,
-                    },
-                    body: JSON.stringify(data),
-                });
-                if (response.ok) {
-                    showStatus('تم تحديث معلومات الحدث بنجاح!');
-                    loadAllData();
-                } else {
-                    showStatus('فشل في تحديث معلومات الحدث.', 'error');
-                }
-            } catch (error) {
-                showStatus('خطأ في الشبكة. يرجى المحاولة مرة أخرى.', 'error');
-            }
-        });
-
-        // Update Message (English)
-        document.getElementById('messageFormEn').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const message = document.getElementById('editMessageEn').value;
-
-            try {
-                const response = await fetch('/api/event', {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`,
-                    },
-                    body: JSON.stringify({ parentsMessage: message }),
-                });
-                if (response.ok) {
-                    showStatus('Message updated successfully!');
-                    loadAllData();
-                } else {
-                    showStatus('Failed to update message.', 'error');
-                }
-            } catch (error) {
-                showStatus('Network error. Please try again.', 'error');
-            }
-        });
-
-        // Update Message (Arabic)
-        document.getElementById('messageFormAr').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const message = document.getElementById('editMessageAr').value;
-
-            try {
-                const response = await fetch('/api/event', {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`,
-                    },
-                    body: JSON.stringify({ parentsMessageAr: message }),
-                });
-                if (response.ok) {
-                    showStatus('تم تحديث الرسالة بنجاح!');
-                    loadAllData();
-                } else {
-                    showStatus('فشل في تحديث الرسالة.', 'error');
-                }
-            } catch (error) {
-                showStatus('خطأ في الشبكة. يرجى المحاولة مرة أخرى.', 'error');
-            }
-        });
 
         // Load gallery
         async function loadGallery() {
@@ -1452,12 +1058,8 @@
             });
         });
 
-        // Load all data when page loads
-        loadAllData();
-
         // Reload data every 5 seconds to keep in sync
         setInterval(() => {
-            loadAllData();
             loadGallery();
             loadVideos();
         }, 5000);
