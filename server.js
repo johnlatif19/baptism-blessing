@@ -1,448 +1,555 @@
-const {
-  RekognitionClient,
-  IndexFacesCommand,
-  SearchFacesByImageCommand,
-  DetectFacesCommand,
-  ListCollectionsCommand,
-  CreateCollectionCommand,
-  DeleteCollectionCommand,
-  DeleteFacesCommand
-} = require('@aws-sdk/client-rekognition');
-
-const {
-  S3Client,
-  PutObjectCommand,
-  DeleteObjectCommand,
-  HeadObjectCommand
-} = require('@aws-sdk/client-s3');
-
-const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
-const sharp = require('sharp');
-const crypto = require('crypto');
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const helmet = require('helmet');
+const compression = require('compression');
+const rateLimit = require('express-rate-limit');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+const multer = require('multer');
+const { body, validationResult } = require('express-validator');
+const path = require('path');
+const cloudinary = require('cloudinary').v2;
 const admin = require('firebase-admin');
+const { v4: uuidv4 } = require('uuid');
 
-class FaceRecognitionService {
-  constructor() {
-    // Initialize AWS clients
-    this.rekognition = new RekognitionClient({
-      region: process.env.AWS_REGION || 'us-east-1',
-      credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
-      }
-    });
+// ==================== INITIALIZATION ====================
 
-    this.s3 = new S3Client({
-      region: process.env.AWS_REGION || 'us-east-1',
-      credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
-      }
-    });
+// Validate required environment variables
+const requiredEnvVars = [
+  'JWT_SECRET',
+  'CLOUDINARY_CLOUD_NAME',
+  'CLOUDINARY_API_KEY',
+  'CLOUDINARY_API_SECRET',
+  'FIREBASE_CONFIG',
+  'ADMIN_USERNAME',
+  'ADMIN_PASSWORD'
+];
 
-    this.collectionId = process.env.AWS_REKOGNITION_COLLECTION || 'baptism-blessing-faces';
-    this.bucketName = process.env.AWS_S3_BUCKET;
-    this.db = admin.firestore();
-  }
-
-  // Initialize collection
-  async initializeCollection() {
-    try {
-      // Check if collection exists
-      const collections = await this.rekognition.send(
-        new ListCollectionsCommand({})
-      );
-
-      if (!collections.CollectionIds.includes(this.collectionId)) {
-        await this.rekognition.send(
-          new CreateCollectionCommand({
-            CollectionId: this.collectionId
-          })
-        );
-        console.log(`✅ Created collection: ${this.collectionId}`);
-      } else {
-        console.log(`✅ Collection already exists: ${this.collectionId}`);
-      }
-      return true;
-    } catch (error) {
-      console.error('Error initializing collection:', error);
-      throw error;
-    }
-  }
-
-  // Index faces from a gallery image
-  async indexFacesFromImage(imageUrl, imageId, metadata = {}) {
-    try {
-      // Download image from Cloudinary or URL
-      const imageBuffer = await this.downloadImage(imageUrl);
-      
-      // Optimize image for Rekognition
-      const optimizedBuffer = await sharp(imageBuffer)
-        .resize(1024, 1024, { fit: 'inside' })
-        .jpeg({ quality: 80 })
-        .toBuffer();
-
-      // Upload to S3 for Rekognition
-      const s3Key = `temp/${imageId}_${Date.now()}.jpg`;
-      await this.s3.send(
-        new PutObjectCommand({
-          Bucket: this.bucketName,
-          Key: s3Key,
-          Body: optimizedBuffer,
-          ContentType: 'image/jpeg'
-        })
-      );
-
-      // Index faces
-      const command = new IndexFacesCommand({
-        CollectionId: this.collectionId,
-        Image: {
-          S3Object: {
-            Bucket: this.bucketName,
-            Name: s3Key
-          }
-        },
-        DetectionAttributes: ['DEFAULT'],
-        MaxFaces: 100,
-        QualityFilter: 'AUTO'
-      });
-
-      const response = await this.rekognition.send(command);
-      
-      // Clean up S3 temp file
-      await this.s3.send(
-        new DeleteObjectCommand({
-          Bucket: this.bucketName,
-          Key: s3Key
-        })
-      );
-
-      // Store face records in Firestore
-      const faceRecords = response.FaceRecords || [];
-      const indexedFaces = [];
-
-      for (const record of faceRecords) {
-        if (record.Face && record.Face.FaceId) {
-          const faceId = record.Face.FaceId;
-          const faceData = {
-            faceId: faceId,
-            imageId: imageId,
-            imageUrl: imageUrl,
-            boundingBox: record.Face.BoundingBox || null,
-            confidence: record.Face.Confidence || 0,
-            quality: record.Face.Quality || null,
-            indexedAt: admin.firestore.FieldValue.serverTimestamp(),
-            metadata: metadata
-          };
-
-          // Store in Firestore
-          await this.db.collection('faceIndex').doc(faceId).set(faceData);
-          
-          // Also store reference in gallery image
-          await this.db.collection('gallery').doc(imageId).update({
-            faces: admin.firestore.FieldValue.arrayUnion(faceId)
-          });
-
-          indexedFaces.push(faceData);
-        }
-      }
-
-      return {
-        success: true,
-        indexedCount: indexedFaces.length,
-        faces: indexedFaces,
-        unindexedFaces: response.UnindexedFaces || []
-      };
-    } catch (error) {
-      console.error('Error indexing faces:', error);
-      throw error;
-    }
-  }
-
-  // Search for faces matching an uploaded image
-  async searchFacesByImage(imageBuffer, maxFaces = 100, faceMatchThreshold = 70) {
-    try {
-      // Optimize image
-      const optimizedBuffer = await sharp(imageBuffer)
-        .resize(1024, 1024, { fit: 'inside' })
-        .jpeg({ quality: 80 })
-        .toBuffer();
-
-      // Upload to S3 for Rekognition
-      const s3Key = `search/${crypto.randomUUID()}.jpg`;
-      await this.s3.send(
-        new PutObjectCommand({
-          Bucket: this.bucketName,
-          Key: s3Key,
-          Body: optimizedBuffer,
-          ContentType: 'image/jpeg'
-        })
-      );
-
-      // Search faces
-      const command = new SearchFacesByImageCommand({
-        CollectionId: this.collectionId,
-        Image: {
-          S3Object: {
-            Bucket: this.bucketName,
-            Name: s3Key
-          }
-        },
-        MaxFaces: maxFaces,
-        FaceMatchThreshold: faceMatchThreshold
-      });
-
-      const response = await this.rekognition.send(command);
-      
-      // Clean up
-      await this.s3.send(
-        new DeleteObjectCommand({
-          Bucket: this.bucketName,
-          Key: s3Key
-        })
-      );
-
-      // Get detailed face information from Firestore
-      const matchedFaces = [];
-      const faceIds = response.FaceMatches.map(match => match.Face.FaceId);
-      
-      if (faceIds.length > 0) {
-        const faceSnapshot = await this.db.collection('faceIndex')
-          .where('faceId', 'in', faceIds)
-          .get();
-
-        const faceDataMap = {};
-        faceSnapshot.forEach(doc => {
-          faceDataMap[doc.id] = doc.data();
-        });
-
-        // Get unique image IDs
-        const imageIds = new Set();
-        const faceMatches = [];
-
-        for (const match of response.FaceMatches) {
-          const faceId = match.Face.FaceId;
-          const faceData = faceDataMap[faceId];
-          
-          if (faceData) {
-            imageIds.add(faceData.imageId);
-            faceMatches.push({
-              faceId: faceId,
-              similarity: match.Similarity,
-              imageId: faceData.imageId,
-              imageUrl: faceData.imageUrl,
-              boundingBox: faceData.boundingBox,
-              confidence: faceData.confidence
-            });
-          }
-        }
-
-        // Get gallery image details
-        const imageDetails = {};
-        if (imageIds.size > 0) {
-          const imageSnapshot = await this.db.collection('gallery')
-            .where('__name__', 'in', Array.from(imageIds))
-            .get();
-
-          imageSnapshot.forEach(doc => {
-            imageDetails[doc.id] = {
-              id: doc.id,
-              ...doc.data()
-            };
-          });
-        }
-
-        // Build final result
-        for (const match of faceMatches) {
-          const imageDetail = imageDetails[match.imageId];
-          if (imageDetail) {
-            matchedFaces.push({
-              ...match,
-              image: imageDetail
-            });
-          }
-        }
-      }
-
-      return {
-        success: true,
-        matches: matchedFaces,
-        matchedCount: matchedFaces.length,
-        searchFacesCount: response.SearchedFaceBoundingBox ? 1 : 0
-      };
-    } catch (error) {
-      console.error('Error searching faces:', error);
-      throw error;
-    }
-  }
-
-  // Detect faces in an image
-  async detectFaces(imageBuffer) {
-    try {
-      const optimizedBuffer = await sharp(imageBuffer)
-        .resize(1024, 1024, { fit: 'inside' })
-        .jpeg({ quality: 80 })
-        .toBuffer();
-
-      // Upload to S3
-      const s3Key = `detect/${crypto.randomUUID()}.jpg`;
-      await this.s3.send(
-        new PutObjectCommand({
-          Bucket: this.bucketName,
-          Key: s3Key,
-          Body: optimizedBuffer,
-          ContentType: 'image/jpeg'
-        })
-      );
-
-      const command = new DetectFacesCommand({
-        Image: {
-          S3Object: {
-            Bucket: this.bucketName,
-            Name: s3Key
-          }
-        },
-        Attributes: ['DEFAULT']
-      });
-
-      const response = await this.rekognition.send(command);
-
-      // Clean up
-      await this.s3.send(
-        new DeleteObjectCommand({
-          Bucket: this.bucketName,
-          Key: s3Key
-        })
-      );
-
-      return {
-        success: true,
-        faceCount: response.FaceDetails ? response.FaceDetails.length : 0,
-        faces: response.FaceDetails || []
-      };
-    } catch (error) {
-      console.error('Error detecting faces:', error);
-      throw error;
-    }
-  }
-
-  // Download image from URL
-  async downloadImage(url) {
-    try {
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`Failed to download image: ${response.statusText}`);
-      }
-      const buffer = await response.arrayBuffer();
-      return Buffer.from(buffer);
-    } catch (error) {
-      console.error('Error downloading image:', error);
-      throw error;
-    }
-  }
-
-  // Delete faces for a specific image
-  async deleteFacesByImageId(imageId) {
-    try {
-      // Get all faces for this image
-      const faceSnapshot = await this.db.collection('faceIndex')
-        .where('imageId', '==', imageId)
-        .get();
-
-      const faceIds = [];
-      faceSnapshot.forEach(doc => {
-        faceIds.push(doc.id);
-      });
-
-      if (faceIds.length > 0) {
-        // Delete from Rekognition
-        await this.rekognition.send(
-          new DeleteFacesCommand({
-            CollectionId: this.collectionId,
-            FaceIds: faceIds
-          })
-        );
-
-        // Delete from Firestore
-        const batch = this.db.batch();
-        faceSnapshot.forEach(doc => {
-          batch.delete(doc.ref);
-        });
-        await batch.commit();
-      }
-
-      // Remove face references from gallery
-      await this.db.collection('gallery').doc(imageId).update({
-        faces: []
-      });
-
-      return {
-        success: true,
-        deletedCount: faceIds.length
-      };
-    } catch (error) {
-      console.error('Error deleting faces:', error);
-      throw error;
-    }
-  }
-
-  // Reindex all gallery images
-  async reindexAllGallery() {
-    try {
-      const snapshot = await this.db.collection('gallery').get();
-      const results = [];
-
-      for (const doc of snapshot.docs) {
-        const data = doc.data();
-        if (data.url) {
-          try {
-            const result = await this.indexFacesFromImage(
-              data.url,
-              doc.id,
-              { title: data.title || 'Gallery image' }
-            );
-            results.push({
-              imageId: doc.id,
-              success: true,
-              indexedCount: result.indexedCount
-            });
-          } catch (error) {
-            results.push({
-              imageId: doc.id,
-              success: false,
-              error: error.message
-            });
-          }
-        }
-      }
-
-      return {
-        success: true,
-        totalImages: snapshot.size,
-        results: results
-      };
-    } catch (error) {
-      console.error('Error reindexing gallery:', error);
-      throw error;
-    }
-  }
-
-  // Get collection statistics
-  async getCollectionStats() {
-    try {
-      const faceSnapshot = await this.db.collection('faceIndex').get();
-      const gallerySnapshot = await this.db.collection('gallery').get();
-
-      return {
-        totalFaces: faceSnapshot.size,
-        totalImages: gallerySnapshot.size,
-        collectionId: this.collectionId
-      };
-    } catch (error) {
-      console.error('Error getting collection stats:', error);
-      throw error;
-    }
-  }
+const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
+if (missingEnvVars.length > 0) {
+  console.error(`❌ Missing required environment variables: ${missingEnvVars.join(', ')}`);
+  console.error('Please check your .env file');
+  process.exit(1);
 }
 
-module.exports = FaceRecognitionService;
+// Initialize Firebase Admin
+let firebaseConfig;
+try {
+  firebaseConfig = JSON.parse(process.env.FIREBASE_CONFIG);
+} catch (error) {
+  console.error('❌ Invalid FIREBASE_CONFIG JSON format:', error.message);
+  process.exit(1);
+}
+
+admin.initializeApp({
+  credential: admin.credential.cert(firebaseConfig)
+});
+
+const db = admin.firestore();
+
+// Initialize Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+// ==================== EXPRESS APP ====================
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// ==================== MIDDLEWARE ====================
+
+// Security headers
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://api.qrserver.com"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      imgSrc: ["'self'", "data:", "https://res.cloudinary.com", "https://api.qrserver.com"],
+      frameSrc: ["'self'", "https://www.google.com", "https://www.youtube.com"],
+      connectSrc: ["'self'"],
+    },
+  },
+  crossOriginEmbedderPolicy: false
+}));
+
+// CORS
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' 
+    ? ['https://baptism-blessing.vercel.app']
+    : ['http://localhost:3000', 'http://localhost:5500', 'http://127.0.0.1:5500'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// Compression
+app.use(compression());
+
+// JSON and URL encoded - زودنا لـ 500MB
+app.use(express.json({ limit: '500mb' }));
+app.use(express.urlencoded({ extended: true, limit: '500mb' }));
+
+// Static files
+app.use(express.static(path.join(__dirname, 'public'), {
+  maxAge: '1y',
+  etag: true
+}));
+
+// ==================== RATE LIMITING ====================
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 1000,
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false
+});
+app.use('/api/', limiter);
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  message: 'Too many authentication attempts, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false
+});
+app.use('/api/login', authLimiter);
+
+// ==================== MULTER CONFIGURATION ====================
+
+const storage = multer.memoryStorage();
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 500 * 1024 * 1024 // 500MB for videos
+  },
+  fileFilter: (req, file, cb) => {
+    // Allow images and videos
+    const allowedTypes = [
+      'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
+      'video/mp4', 'video/mpeg', 'video/quicktime', 'video/x-msvideo', 'video/webm'
+    ];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image and video files are allowed'), false);
+    }
+  }
+});
+
+// ==================== JWT CONFIGURATION ====================
+
+const JWT_SECRET = process.env.JWT_SECRET;
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+
+// ==================== AUTHENTICATION MIDDLEWARE ====================
+
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).json({ message: 'Access token required' });
+  }
+
+  try {
+    const user = jwt.verify(token, JWT_SECRET);
+    req.user = user;
+    next();
+  } catch (err) {
+    if (err.name === 'TokenExpiredError') {
+      return res.status(403).json({ message: 'Token expired' });
+    }
+    return res.status(403).json({ message: 'Invalid token' });
+  }
+};
+
+// ==================== API ROUTES ====================
+
+// Health check
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
+// ==================== AUTH ROUTES ====================
+
+// Login
+app.post('/api/login', [
+  body('username').notEmpty().withMessage('Username is required').trim().escape(),
+  body('password').notEmpty().withMessage('Password is required')
+], async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ message: errors.array()[0].msg });
+  }
+
+  const { username, password, rememberMe } = req.body;
+
+  try {
+    // Check if user exists in Firestore
+    const userSnapshot = await db.collection('users')
+      .where('username', '==', username)
+      .limit(1)
+      .get();
+
+    let userData = null;
+    let userDocId = null;
+
+    if (!userSnapshot.empty) {
+      userDocId = userSnapshot.docs[0].id;
+      userData = userSnapshot.docs[0].data();
+    }
+
+    // If no user found, check hardcoded admin from .env
+    if (!userData) {
+      if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+        // Create admin user in database if not exists
+        const adminCheck = await db.collection('users')
+          .where('username', '==', ADMIN_USERNAME)
+          .limit(1)
+          .get();
+
+        if (adminCheck.empty) {
+          const hashedPassword = await bcrypt.hash(ADMIN_PASSWORD, 10);
+          await db.collection('users').add({
+            username: ADMIN_USERNAME,
+            password: hashedPassword,
+            role: 'admin',
+            createdAt: admin.firestore.FieldValue.serverTimestamp()
+          });
+        }
+
+        const token = jwt.sign(
+          { username: ADMIN_USERNAME, role: 'admin' },
+          JWT_SECRET,
+          { expiresIn: rememberMe ? '30d' : '24h' }
+        );
+
+        return res.json({ 
+          token, 
+          message: 'Login successful',
+          user: { username: ADMIN_USERNAME, role: 'admin' }
+        });
+      }
+      
+      return res.status(401).json({ message: 'Invalid username or password' });
+    }
+
+    // Verify password
+    const isValidPassword = await bcrypt.compare(password, userData.password);
+    if (!isValidPassword) {
+      return res.status(401).json({ message: 'Invalid username or password' });
+    }
+
+    // Generate token
+    const token = jwt.sign(
+      { username: userData.username, role: userData.role || 'admin' },
+      JWT_SECRET,
+      { expiresIn: rememberMe ? '30d' : '24h' }
+    );
+
+    res.json({ 
+      token, 
+      message: 'Login successful',
+      user: { username: userData.username, role: userData.role || 'admin' }
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ message: 'Server error during login' });
+  }
+});
+
+// Logout
+app.post('/api/logout', authenticateToken, (req, res) => {
+  res.json({ message: 'Logged out successfully' });
+});
+
+// ==================== GALLERY ROUTES ====================
+
+// GET gallery images
+app.get('/api/gallery', async (req, res) => {
+  try {
+    const snapshot = await db.collection('gallery')
+      .orderBy('createdAt', 'desc')
+      .get();
+    
+    const images = [];
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      images.push({ 
+        id: doc.id, 
+        ...data,
+        createdAt: data.createdAt ? data.createdAt.toDate().toISOString() : null
+      });
+    });
+    res.json(images);
+  } catch (error) {
+    console.error('Error fetching gallery:', error);
+    res.status(500).json({ message: 'Error fetching gallery' });
+  }
+});
+
+// POST upload image
+app.post('/api/gallery', authenticateToken, upload.single('image'), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: 'No image file provided' });
+  }
+
+  try {
+    const result = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: 'baptism-blessing/gallery',
+          transformation: [
+            { width: 1920, crop: 'limit', quality: 'auto' }
+          ],
+          public_id: `gallery_${uuidv4()}`
+        },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      );
+      uploadStream.end(req.file.buffer);
+    });
+
+    const imageData = {
+      url: result.secure_url,
+      publicId: result.public_id,
+      title: req.body.title || 'Image',
+      createdAt: admin.firestore.FieldValue.serverTimestamp()
+    };
+
+    const docRef = await db.collection('gallery').add(imageData);
+    res.status(201).json({ 
+      message: 'Image uploaded successfully',
+      id: docRef.id,
+      url: result.secure_url,
+      publicId: result.public_id,
+      title: imageData.title
+    });
+  } catch (error) {
+    console.error('Error uploading image:', error);
+    res.status(500).json({ message: 'Error uploading image' });
+  }
+});
+
+// DELETE gallery image
+app.delete('/api/gallery/:id', authenticateToken, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const doc = await db.collection('gallery').doc(id).get();
+    if (!doc.exists) {
+      return res.status(404).json({ message: 'Image not found' });
+    }
+
+    const imageData = doc.data();
+    
+    if (imageData.publicId) {
+      await cloudinary.uploader.destroy(imageData.publicId);
+    }
+
+    await db.collection('gallery').doc(id).delete();
+    res.json({ message: 'Image deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting image:', error);
+    res.status(500).json({ message: 'Error deleting image' });
+  }
+});
+
+// ==================== VIDEO ROUTES ====================
+
+// GET videos
+app.get('/api/videos', async (req, res) => {
+  try {
+    const snapshot = await db.collection('videos')
+      .orderBy('createdAt', 'desc')
+      .get();
+    
+    const videos = [];
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      videos.push({ 
+        id: doc.id, 
+        ...data,
+        createdAt: data.createdAt ? data.createdAt.toDate().toISOString() : null
+      });
+    });
+    res.json(videos);
+  } catch (error) {
+    console.error('Error fetching videos:', error);
+    res.status(500).json({ message: 'Error fetching videos' });
+  }
+});
+
+// POST upload video with extended timeout
+app.post('/api/video', authenticateToken, [
+    body('url').isURL().withMessage('Valid URL is required'),
+    body('publicId').optional().isString(),
+    body('title').optional().isString().trim(),
+    body('description').optional().isString().trim()
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ message: errors.array()[0].msg });
+    }
+
+    try {
+        const videoData = {
+            url: req.body.url,
+            publicId: req.body.publicId || '',
+            title: req.body.title || 'Video',
+            description: req.body.description || '',
+            createdAt: admin.firestore.FieldValue.serverTimestamp()
+        };
+
+        const docRef = await db.collection('videos').add(videoData);
+        res.status(201).json({ 
+            message: 'Video added successfully',
+            id: docRef.id,
+            ...videoData
+        });
+    } catch (error) {
+        console.error('Error saving video:', error);
+        res.status(500).json({ message: 'Error saving video' });
+    }
+});
+
+// DELETE video
+app.delete('/api/video/:id', authenticateToken, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const doc = await db.collection('videos').doc(id).get();
+    if (!doc.exists) {
+      return res.status(404).json({ message: 'Video not found' });
+    }
+
+    const videoData = doc.data();
+    
+    if (videoData.publicId) {
+      await cloudinary.uploader.destroy(videoData.publicId, { resource_type: 'video' });
+    }
+
+    await db.collection('videos').doc(id).delete();
+    res.json({ message: 'Video deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting video:', error);
+    res.status(500).json({ message: 'Error deleting video' });
+  }
+});
+
+// ==================== HTML ROUTES (Clean URLs) ====================
+
+// Serve index.html for root
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Serve login.html for /login
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+
+// Serve dashboard.html for /dashboard
+app.get('/dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+});
+
+// Serve gallery.html for /gallery
+app.get('/gallery', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'gallery.html'));
+});
+
+// Serve videos.html for /videos
+app.get('/videos', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'videos.html'));
+});
+
+// ==================== FALLBACK ROUTE ====================
+
+app.get('*', (req, res) => {
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ message: 'API endpoint not found' });
+  }
+  res.redirect('/');
+});
+
+// ==================== ERROR HANDLING ====================
+
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api/')) {
+    res.status(404).json({ message: 'API endpoint not found' });
+  } else {
+    res.redirect('/');
+  }
+});
+
+app.use((err, req, res, next) => {
+  console.error('Server Error:', err);
+  
+  // Multer error handling
+  if (err instanceof multer.MulterError) {
+    if (err.code === 'FILE_TOO_LARGE') {
+      return res.status(413).json({ message: 'File too large. Maximum size is 500MB' });
+    }
+    return res.status(400).json({ message: err.message });
+  }
+
+  // JWT error handling
+  if (err.name === 'JsonWebTokenError') {
+    return res.status(403).json({ message: 'Invalid token' });
+  }
+
+  if (err.name === 'TokenExpiredError') {
+    return res.status(403).json({ message: 'Token expired' });
+  }
+
+  // Default error
+  res.status(500).json({ 
+    message: 'Internal server error',
+    error: process.env.NODE_ENV === 'development' ? err.message : undefined
+  });
+});
+
+// ==================== START SERVER ====================
+
+app.listen(PORT, () => {
+  console.log('=================================');
+  console.log('🕊️  Baptism Blessing Server');
+  console.log('=================================');
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`📱 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🔐 JWT: ${JWT_SECRET ? 'Configured ✅' : 'Missing ❌'}`);
+  console.log(`☁️  Cloudinary: ${process.env.CLOUDINARY_CLOUD_NAME ? 'Configured ✅' : 'Missing ❌'}`);
+  console.log(`🔥 Firebase: ${firebaseConfig.project_id ? 'Configured ✅' : 'Missing ❌'}`);
+  console.log('=================================');
+  console.log('📋 Admin Credentials from .env:');
+  console.log(`   Username: ${ADMIN_USERNAME}`);
+  console.log(`   Password: ${ADMIN_PASSWORD}`);
+  console.log('=================================');
+  console.log('🌐 Clean URLs:');
+  console.log(`   Home: http://localhost:${PORT}/`);
+  console.log(`   Login: http://localhost:${PORT}/login`);
+  console.log(`   Dashboard: http://localhost:${PORT}/dashboard`);
+  console.log(`   Gallery: http://localhost:${PORT}/gallery`);
+  console.log(`   Videos: http://localhost:${PORT}/videos`);
+  console.log('=================================');
+  console.log('📹 Video upload limit: 500MB');
+  console.log('⏱️  Cloudinary timeout: 10 minutes');
+  console.log('=================================');
+});
+
+module.exports = app;
