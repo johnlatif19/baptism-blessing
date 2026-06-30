@@ -767,7 +767,7 @@
                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
                     <circle cx="12" cy="10" r="3"/>
                 </svg>
-                <h3 data-i18n="event.church">Church</h3>
+                <h3 data-i18n="event.church">Monastery</h3>
                 <p id="eventChurch" data-i18n="event.churchValue">Monastery of Saint Bishoy</p>
             </div>
             <div class="event-card">
@@ -775,7 +775,7 @@
                     <path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/>
                     <circle cx="12" cy="10" r="3"/>
                 </svg>
-                <h3 data-i18n="event.reception">Reception</h3>
+                <h3 data-i18n="event.reception">Monastery location</h3>
                 <p id="eventReception" data-i18n="event.receptionValue">Anba Bishoy Monastery Road, Wadi El Natrun</p>
             </div>
         </div>
@@ -822,7 +822,7 @@
         <p class="section-subtitle" data-i18n="message.subtitle">A word from the heart</p>
         <div class="message-box">
             <p class="quote" id="parentsMessage" data-i18n="message.text">"We are delighted and honored by your presence to celebrate the Holy Sacrament of Baptism of our precious child Mikal Mina"</p>
-            <p class="author" id="parentsNames" data-i18n="message.author">- Mina & Mariam</p>
+            <p class="author" id="parentsNames" data-i18n="message.author">Mina & Mariam</p>
         </div>
     </section>
 
@@ -877,6 +877,8 @@
                 'message.subtitle': 'A word from the heart',
                 'message.text': '"We are delighted and honored by your presence to celebrate the Holy Sacrament of Baptism of our precious child Mikal Mina"',
                 'message.author': 'Mina & Mariam',
+                'footer.made': 'Made with',
+                'footer.for': 'for celebrating God\'s blessings.'
             },
             ar: {
                 'nav.event': 'الحدث',
@@ -921,6 +923,8 @@
                 'message.subtitle': 'كلمة من القلب',
                 'message.text': '"يسعدنا ويشرفنا حضوركم للاحتفال بسر المعمودية المقدسة لطفلتنا الغالية ميكال مينا"',
                 'message.author': 'مينا ومريم',
+                'footer.made': 'صنع بـ',
+                'footer.for': 'للاحتفال ببركات الله.'
             }
         };
 
@@ -1022,32 +1026,6 @@
         updateCountdown();
         setInterval(updateCountdown, 1000);
 
-        // Fetch event data from API
-        async function fetchEventData() {
-            try {
-                const response = await fetch('/api/event');
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data && Object.keys(data).length > 0) {
-                        if (data.babyName) document.getElementById('babyName').textContent = data.babyName;
-                        if (data.date) document.getElementById('eventDate').textContent = data.date;
-                        if (data.time) document.getElementById('eventTime').textContent = data.time;
-                        if (data.church) document.getElementById('eventChurch').textContent = data.church;
-                        if (data.reception) document.getElementById('eventReception').textContent = data.reception;
-                        if (data.mapLink) {
-                            document.getElementById('mapButton').href = data.mapLink;
-                        }
-                        if (data.parentsNames) document.getElementById('parentsNames').textContent = data.parentsNames;
-                        if (data.parentsMessage) document.getElementById('parentsMessage').textContent = data.parentsMessage;
-                    }
-                }
-            } catch (error) {
-                console.log('Using default event data');
-            }
-        }
-
-        fetchEventData();
-
         // Load gallery status - show text only, not images
         async function loadGalleryStatus() {
             try {
@@ -1056,7 +1034,6 @@
                     const images = await response.json();
                     const grid = document.getElementById('galleryGrid');
                     if (images && images.length > 0) {
-                        // Show "تم رفع الصور" message
                         grid.innerHTML = `
                             <div onclick="window.location.href='/gallery'" style="grid-column: 1 / -1; text-align: center; padding: 2rem; background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border-color); transition: var(--transition); cursor: pointer;">
                                 <span style="font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--text-secondary);" data-i18n="gallery.uploaded">✅ تم رفع الصور</span>
@@ -1064,7 +1041,6 @@
                             </div>
                         `;
                     } else {
-                        // Show "لم يتم رفع صور بعد"
                         grid.innerHTML = `
                             <div onclick="window.location.href='/gallery'" style="grid-column: 1 / -1; text-align: center; padding: 2rem; background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border-color); transition: var(--transition); cursor: pointer;">
                                 <span style="font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--text-secondary);" data-i18n="gallery.notUploaded">📷 لم يتم رفع صور بعد</span>
@@ -1072,7 +1048,6 @@
                             </div>
                         `;
                     }
-                    // Re-apply translations
                     document.querySelectorAll('[data-i18n]').forEach(el => {
                         const key = el.getAttribute('data-i18n');
                         if (translations[currentLang] && translations[currentLang][key]) {
@@ -1093,7 +1068,6 @@
                     const videos = await response.json();
                     const grid = document.getElementById('videoGrid');
                     if (videos && videos.length > 0) {
-                        // Show "تم رفع الفيديوهات" message
                         grid.innerHTML = `
                             <div onclick="window.location.href='/videos'" style="grid-column: 1 / -1; text-align: center; padding: 2rem; background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border-color); transition: var(--transition); cursor: pointer;">
                                 <span style="font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--text-secondary);" data-i18n="videos.uploaded">✅ تم رفع الفيديوهات</span>
@@ -1101,7 +1075,6 @@
                             </div>
                         `;
                     } else {
-                        // Show "لم يتم رفع فيديوهات بعد"
                         grid.innerHTML = `
                             <div onclick="window.location.href='/videos'" style="grid-column: 1 / -1; text-align: center; padding: 2rem; background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border-color); transition: var(--transition); cursor: pointer;">
                                 <span style="font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--text-secondary);" data-i18n="videos.notUploaded">🎬 لم يتم رفع فيديوهات بعد</span>
@@ -1109,7 +1082,6 @@
                             </div>
                         `;
                     }
-                    // Re-apply translations
                     document.querySelectorAll('[data-i18n]').forEach(el => {
                         const key = el.getAttribute('data-i18n');
                         if (translations[currentLang] && translations[currentLang][key]) {
@@ -1125,29 +1097,8 @@
         loadGalleryStatus();
         loadVideosStatus();
 
-        // Save default data to Firestore on first load
-        async function saveDefaultData() {
-            try {
-                const saved = localStorage.getItem('defaultDataSaved');
-                if (saved) return;
-                
-                const response = await fetch('/api/save-default', {
-                    method: 'POST',
-                });
-                if (response.ok) {
-                    localStorage.setItem('defaultDataSaved', 'true');
-                    console.log('Default data saved to Firestore');
-                }
-            } catch (error) {
-                console.log('Error saving default data:', error);
-            }
-        }
-
-        saveDefaultData();
-
-        // Update data every 30 seconds
+        // Update gallery and videos status every 5 seconds
         setInterval(() => {
-            fetchEventData();
             loadGalleryStatus();
             loadVideosStatus();
         }, 5000);
