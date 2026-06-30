@@ -512,18 +512,18 @@
         });
 
         // Check if already logged in
-        const token = localStorage.getItem('token');
-        if (token) {
-            fetch('/api/event', {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
-            }).then(response => {
-                if (response.ok) {
-                    window.location.href = '/dashboard';
-                }
-            }).catch(() => {});
+const token = localStorage.getItem('token');
+if (token) {
+    fetch('/api/gallery', {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+        },
+    }).then(response => {
+        if (response.ok) {
+            window.location.href = '/dashboard';
         }
+    }).catch(() => {});
+}
     </script>
 </body>
 </html>
