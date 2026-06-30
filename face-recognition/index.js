@@ -1,7 +1,6 @@
 const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
-const os = require('os');
 const crypto = require('crypto');
 
 class FaceRecognition {
@@ -12,18 +11,13 @@ class FaceRecognition {
         this.model = process.env.FACE_RECOGNITION_MODEL || 'buffalo_l';
         this.tempDir = path.join(__dirname, '..', 'uploads', 'temp');
         
-        // إنشاء المجلدات المؤقتة
         if (!fs.existsSync(this.tempDir)) {
             fs.mkdirSync(this.tempDir, { recursive: true });
         }
     }
 
-    /**
-     * استخراج Embedding من صورة واحدة
-     */
     async extractFaceEmbedding(imageBuffer) {
         return new Promise((resolve, reject) => {
-            // حفظ الصورة مؤقتاً
             const tempId = crypto.randomBytes(16).toString('hex');
             const tempPath = path.join(this.tempDir, `${tempId}.jpg`);
             
@@ -34,7 +28,6 @@ class FaceRecognition {
                 return;
             }
 
-            // تشغيل سكريبت Python لاستخراج الـ Embedding
             const pythonScript = path.join(__dirname, 'extract_single_face.py');
             const pythonProcess = spawn(this.pythonPath, [pythonScript, tempPath]);
 
@@ -50,12 +43,7 @@ class FaceRecognition {
             });
 
             pythonProcess.on('close', (code) => {
-                // حذف الملف المؤقت
-                try {
-                    fs.unlinkSync(tempPath);
-                } catch (err) {
-                    console.warn('Could not delete temp file:', err);
-                }
+                try { fs.unlinkSync(tempPath); } catch (err) {}
 
                 if (code !== 0) {
                     reject(new Error(`Python script failed: ${stderr || stdout}`));
@@ -78,24 +66,18 @@ class FaceRecognition {
         });
     }
 
-    /**
-     * البحث عن صور مطابقة في قاعدة البيانات
-     */
     async findMatchingPhotos(embedding) {
         return new Promise((resolve, reject) => {
-            // التحقق من وجود قاعدة البيانات
             if (!fs.existsSync(this.embeddingsFile)) {
                 reject(new Error('Gallery embeddings database not found. Please run extract_embeddings first.'));
                 return;
             }
 
-            // إعداد البيانات للإرسال إلى Python
             const inputData = {
                 embedding: embedding,
                 threshold: this.threshold
             };
 
-            // تشغيل سكريبت البحث
             const pythonScript = path.join(__dirname, 'find_faces.py');
             const pythonProcess = spawn(this.pythonPath, [pythonScript]);
 
@@ -124,18 +106,13 @@ class FaceRecognition {
                 }
             });
 
-            // إرسال البيانات إلى stdin
             pythonProcess.stdin.write(JSON.stringify(inputData));
             pythonProcess.stdin.end();
         });
     }
 
-    /**
-     * استخراج Embeddings من جميع صور المعرض
-     */
     async extractAllGalleryEmbeddings(imagesData) {
         return new Promise((resolve, reject) => {
-            // حفظ بيانات الصور في ملف مؤقت
             const tempId = crypto.randomBytes(16).toString('hex');
             const tempFile = path.join(this.tempDir, `${tempId}.json`);
             
@@ -146,7 +123,6 @@ class FaceRecognition {
                 return;
             }
 
-            // تشغيل سكريبت الاستخراج
             const pythonScript = path.join(__dirname, 'extract_embeddings.py');
             const pythonProcess = spawn(this.pythonPath, [
                 pythonScript,
@@ -167,12 +143,7 @@ class FaceRecognition {
             });
 
             pythonProcess.on('close', (code) => {
-                // حذف الملف المؤقت
-                try {
-                    fs.unlinkSync(tempFile);
-                } catch (err) {
-                    console.warn('Could not delete temp file:', err);
-                }
+                try { fs.unlinkSync(tempFile); } catch (err) {}
 
                 if (code !== 0) {
                     reject(new Error(`Python script failed: ${stderr || stdout}`));
@@ -184,21 +155,12 @@ class FaceRecognition {
         });
     }
 
-    /**
-     * التحقق من وجود قاعدة بيانات Embeddings
-     */
     hasEmbeddingsDatabase() {
         return fs.existsSync(this.embeddingsFile);
     }
 
-    /**
-     * الحصول على معلومات قاعدة البيانات
-     */
     getDatabaseInfo() {
-        if (!this.hasEmbeddingsDatabase()) {
-            return null;
-        }
-        
+        if (!this.hasEmbeddingsDatabase()) return null;
         try {
             const data = JSON.parse(fs.readFileSync(this.embeddingsFile, 'utf8'));
             return {
