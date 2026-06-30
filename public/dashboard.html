@@ -242,8 +242,7 @@
         .dashboard-card .form-group label {
             display: block;
             font-size: 0.8rem;
-            font-weight: 6
-00;
+            font-weight: 600;
             color: var(--text-secondary);
             margin-bottom: 0.25rem;
             transition: var(--transition);
@@ -682,7 +681,7 @@
                     <div class="form-group">
                         <label data-i18n="dashboard.videoFile">Upload Video</label>
                         <input type="file" id="videoFile" accept="video/*" required>
-                        <div class="file-info" id="videoFileInfo">Choose a video file (max 50MB)</div>
+                        <div class="file-info" id="videoFileInfo" data-i18n="dashboard.videoFileInfo">Choose a video file (max 500MB)</div>
                     </div>
                     <div class="form-group">
                         <label data-i18n="dashboard.videoTitle">Title</label>
@@ -746,6 +745,7 @@
                 'dashboard.currentGallery': 'Current Gallery',
                 'dashboard.videoManagement': 'Video Management',
                 'dashboard.videoFile': 'Upload Video',
+                'dashboard.videoFileInfo': 'Choose a video file (max 500MB)',
                 'dashboard.videoTitle': 'Title',
                 'dashboard.videoTitlePlaceholder': 'Video title',
                 'dashboard.videoDesc': 'Description',
@@ -758,7 +758,8 @@
                 'dashboard.scanQR': 'Scan to view the invitation',
                 'dashboard.delete': 'Delete',
                 'dashboard.image': 'Image',
-                'dashboard.video': 'Video'
+                'dashboard.video': 'Video',
+                'dashboard.videoTooLarge': 'Video file is too large. Maximum size is 500MB.'
             },
             ar: {
                 'dashboard.brand': 'معمودية البركة',
@@ -773,6 +774,7 @@
                 'dashboard.currentGallery': 'المعرض الحالي',
                 'dashboard.videoManagement': 'إدارة الفيديوهات',
                 'dashboard.videoFile': 'رفع فيديو',
+                'dashboard.videoFileInfo': 'اختر ملف فيديو (حد أقصى 500 ميجابايت)',
                 'dashboard.videoTitle': 'العنوان',
                 'dashboard.videoTitlePlaceholder': 'عنوان الفيديو',
                 'dashboard.videoDesc': 'الوصف',
@@ -785,7 +787,8 @@
                 'dashboard.scanQR': 'امسح لعرض الدعوة',
                 'dashboard.delete': 'حذف',
                 'dashboard.image': 'صورة',
-                'dashboard.video': 'فيديو'
+                'dashboard.video': 'فيديو',
+                'dashboard.videoTooLarge': 'حجم الفيديو كبير جداً. الحد الأقصى 500 ميجابايت.'
             }
         };
 
@@ -1138,9 +1141,9 @@
                 return;
             }
 
-            // Check file size (50MB max)
-            if (file.size > 50 * 1024 * 1024) {
-                showStatus(currentLang === 'ar' ? 'حجم الفيديو كبير جداً. الحد الأقصى 50 ميجابايت.' : 'Video file is too large. Maximum size is 50MB.', 'error');
+            // Check file size (500MB max)
+            if (file.size > 500 * 1024 * 1024) {
+                showStatus(currentLang === 'ar' ? translations.ar['dashboard.videoTooLarge'] : translations.en['dashboard.videoTooLarge'], 'error');
                 return;
             }
 
@@ -1183,7 +1186,7 @@
                     fileInput.value = '';
                     document.getElementById('videoTitle').value = '';
                     document.getElementById('videoDesc').value = '';
-                    document.getElementById('videoFileInfo').textContent = currentLang === 'ar' ? 'اختر ملف فيديو (حد أقصى 50 ميجابايت)' : 'Choose a video file (max 50MB)';
+                    document.getElementById('videoFileInfo').textContent = currentLang === 'ar' ? translations.ar['dashboard.videoFileInfo'] : translations.en['dashboard.videoFileInfo'];
                     
                     // Success animation
                     btn.classList.remove('btn-loading');
@@ -1215,8 +1218,9 @@
             const file = this.files[0];
             if (file) {
                 const size = (file.size / (1024 * 1024)).toFixed(2);
+                const maxSize = 500;
                 document.getElementById('videoFileInfo').textContent = `${file.name} (${size} MB)`;
-                if (file.size > 50 * 1024 * 1024) {
+                if (file.size > maxSize * 1024 * 1024) {
                     document.getElementById('videoFileInfo').style.color = '#e74c3c';
                 } else {
                     document.getElementById('videoFileInfo').style.color = 'var(--text-gold)';
