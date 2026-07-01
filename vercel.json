@@ -4,17 +4,34 @@
   "builds": [
     {
       "src": "server.js",
-      "use": "@vercel/node"
+      "use": "@vercel/node",
+      "config": {
+        "maxDuration": 60,
+        "memory": 1024
+      }
     },
     {
       "src": "public/**",
       "use": "@vercel/static"
+    },
+    {
+      "src": "server/faceDetection.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "server/downloadModels.js",
+      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/server.js"
+      "dest": "/server.js",
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization"
+      }
     },
     {
       "src": "/login",
@@ -115,5 +132,11 @@
         }
       ]
     }
-  ]
+  ],
+  "functions": {
+    "server.js": {
+      "maxDuration": 60,
+      "memory": 1024
+    }
+  }
 }
