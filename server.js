@@ -13,6 +13,11 @@ const cloudinary = require('cloudinary').v2;
 const admin = require('firebase-admin');
 const { v4: uuidv4 } = require('uuid');
 
+// ==================== FACE DETECTION IMPORTS ====================
+const faceDetection = require('./server/faceDetection');
+// ملاحظة: قم بتنزيل النماذج مرة واحدة عند بدء التشغيل
+// يمكنك تشغيل: node server/downloadModels.js
+
 // ==================== INITIALIZATION ====================
 
 // Validate required environment variables
@@ -451,6 +456,250 @@ app.delete('/api/video/:id', authenticateToken, async (req, res) => {
   }
 });
 
+// ==================== FACE SEARCH ROUTES ====================
+
+// POST search for similar faces
+app.post('/api/search-face', upload.single('image'), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: 'No image file provided' });
+  }
+
+  try {
+    // Load models if not already loaded
+    await faceDetection.loadModels();
+    
+    // Detect faces and generate embeddings from the uploaded image
+    const faceData = await faceDetection.detectFacesAndEmbeddings(req.file.buffer);
+    
+    if (!faceData || faceData.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'No faces detected in the uploaded image'
+      });
+    }
+
+    // Get all gallery images with face data from Firestore
+    const gallerySnapshot = await db.collection('gallery')
+      .where('faces', '!=', null)
+      .get();
+    
+    // Collect all embeddings from all images
+    const allStoredEmbeddings = [];
+    const imageMap = {};
+    
+    gallerySnapshot.forEach(doc => {
+      const data = doc.data();
+      imageMap[doc.id] = {
+        id: doc.id,
+        url: data.url,
+        publicId: data.publicId,
+        title: data.title || 'Image',
+        createdAt: data.createdAt ? data.createdAt.toDate().toISOString() : null
+      };
+      
+      if (data.faces && Array.isArray(data.faces)) {
+        data.faces.forEach((face, index) => {
+          if (face.embedding && Array.isArray(face.embedding) && face.embedding.length > 0) {
+            allStoredEmbeddings.push({
+              embedding: face.embedding,
+              imageId: doc.id,
+              faceIndex: index,
+              metadata: {
+                title: data.title || 'Image',
+                url: data.url
+              }
+            });
+          }
+        });
+      }
+    });
+
+    // Get threshold from query parameter or use default
+    const threshold = parseFloat(req.query.threshold) || 0.5;
+    const normalizedThreshold = Math.max(0, Math.min(1, threshold));
+
+    // Compare query embedding against all stored embeddings
+    // Use the first detected face for comparison
+    const queryEmbedding = faceData[0].embedding;
+    const matches = faceDetection.compareEmbeddings(
+      queryEmbedding,
+      allStoredEmbeddings,
+      normalizedThreshold
+    );
+
+    // Group matches by image ID to avoid duplicates
+    const imageMatches = {};
+    for (const match of matches) {
+      if (!imageMatches[match.imageId] || match.similarity > imageMatches[match.imageId].similarity) {
+        imageMatches[match.imageId] = {
+          similarity: match.similarity,
+          image: imageMap[match.imageId] || { id: match.imageId }
+        };
+      }
+    }
+
+    // Convert to array and sort by similarity
+    const resultMatches = Object.values(imageMatches)
+      .sort((a, b) => b.similarity - a.similarity);
+
+    res.json({
+      success: true,
+      facesDetected: faceData.length,
+      matches: resultMatches,
+      threshold: normalizedThreshold
+    });
+
+  } catch (error) {
+    console.error('Error during face search:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Error during face search',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// GET check if face detection is ready
+app.get('/api/face-detection-status', async (req, res) => {
+  try {
+    await faceDetection.loadModels();
+    res.json({
+      status: 'ready',
+      message: 'Face detection models are loaded and ready'
+    });
+  } catch (error) {
+    res.status(503).json({
+      status: 'unavailable',
+      message: 'Face detection models are not loaded',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// POST update gallery image with face embeddings
+app.post('/api/gallery/:id/faces', authenticateToken, async (req, res) => {
+  const { id } = req.params;
+  
+  try {
+    const doc = await db.collection('gallery').doc(id).get();
+    if (!doc.exists) {
+      return res.status(404).json({ message: 'Image not found' });
+    }
+
+    const imageData = doc.data();
+    if (!imageData.url) {
+      return res.status(400).json({ message: 'Image URL not found' });
+    }
+
+    // Download image from Cloudinary
+    const response = await fetch(imageData.url);
+    const buffer = Buffer.from(await response.arrayBuffer());
+
+    // Detect faces and generate embeddings
+    const faceData = await faceDetection.extractFaceEmbeddings(buffer, {
+      title: imageData.title || 'Image',
+      url: imageData.url
+    });
+
+    // Update document with face embeddings
+    await db.collection('gallery').doc(id).update({
+      faces: faceData.map(face => ({
+        embedding: face.embedding,
+        metadata: face.metadata
+      })),
+      faceCount: faceData.length,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    res.json({
+      success: true,
+      message: `Face embeddings generated for ${faceData.length} faces`,
+      faceCount: faceData.length
+    });
+
+  } catch (error) {
+    console.error('Error generating face embeddings:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Error generating face embeddings',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// POST batch process all gallery images for face detection
+app.post('/api/gallery/batch-process-faces', authenticateToken, async (req, res) => {
+  try {
+    const snapshot = await db.collection('gallery')
+      .where('faces', '==', null)
+      .limit(50) // Process in batches
+      .get();
+
+    if (snapshot.empty) {
+      return res.json({
+        success: true,
+        message: 'No images without face embeddings found',
+        processed: 0
+      });
+    }
+
+    const results = [];
+    for (const doc of snapshot.docs) {
+      try {
+        const data = doc.data();
+        if (!data.url) continue;
+
+        // Download image
+        const response = await fetch(data.url);
+        const buffer = Buffer.from(await response.arrayBuffer());
+
+        // Detect faces
+        const faceData = await faceDetection.extractFaceEmbeddings(buffer, {
+          title: data.title || 'Image',
+          url: data.url
+        });
+
+        // Update document
+        await db.collection('gallery').doc(doc.id).update({
+          faces: faceData.map(face => ({
+            embedding: face.embedding,
+            metadata: face.metadata
+          })),
+          faceCount: faceData.length,
+          updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+
+        results.push({
+          id: doc.id,
+          success: true,
+          faceCount: faceData.length
+        });
+
+      } catch (error) {
+        results.push({
+          id: doc.id,
+          success: false,
+          error: error.message
+        });
+      }
+    }
+
+    res.json({
+      success: true,
+      message: `Processed ${results.length} images`,
+      results: results
+    });
+
+  } catch (error) {
+    console.error('Error batch processing faces:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error batch processing faces',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
 // ==================== HTML ROUTES (Clean URLs) ====================
 
 // Serve index.html for root
@@ -549,6 +798,10 @@ app.listen(PORT, () => {
   console.log('=================================');
   console.log('📹 Video upload limit: 500MB');
   console.log('⏱️  Cloudinary timeout: 10 minutes');
+  console.log('=================================');
+  console.log('👤 Face Detection:');
+  console.log(`   Status: ${faceDetection ? 'Enabled ✅' : 'Disabled ❌'}`);
+  console.log(`   Models: ${faceDetection ? 'Will load on first request' : 'N/A'}`);
   console.log('=================================');
 });
 
