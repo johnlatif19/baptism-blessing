@@ -35,6 +35,7 @@ async function loadModels() {
     console.log('✅ Face detection models loaded successfully');
   } catch (error) {
     console.error('❌ Error loading face detection models:', error);
+    console.error('💡 Run "npm run download-models" to download the models');
     throw new Error('Failed to load face detection models');
   }
 }
