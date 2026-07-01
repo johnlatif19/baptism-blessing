@@ -109,7 +109,13 @@
   "functions": {
     "server.js": {
       "maxDuration": 60,
-      "memory": 1024
+      "memory": 1024,
+      "includeFiles": "models/**"
+    }
+  },
+  "build": {
+    "env": {
+      "NODE_OPTIONS": "--max-old-space-size=1024"
     }
   }
 }
