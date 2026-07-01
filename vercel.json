@@ -1,6 +1,16 @@
 {
   "version": 2,
   "name": "baptism-blessing",
+  "builds": [
+    {
+      "src": "server.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "public/**",
+      "use": "@vercel/static"
+    }
+  ],
   "routes": [
     {
       "src": "/api/(.*)",
@@ -105,17 +115,5 @@
         }
       ]
     }
-  ],
-  "functions": {
-    "server.js": {
-      "maxDuration": 60,
-      "memory": 1024,
-      "includeFiles": "models/**"
-    }
-  },
-  "build": {
-    "env": {
-      "NODE_OPTIONS": "--max-old-space-size=1024"
-    }
-  }
+  ]
 }
