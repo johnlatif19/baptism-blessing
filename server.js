@@ -91,7 +91,7 @@ app.use(cors({
 // Compression
 app.use(compression());
 
-// JSON and URL encoded
+// JSON and URL encoded - زودنا لـ 500MB
 app.use(express.json({ limit: '500mb' }));
 app.use(express.urlencoded({ extended: true, limit: '500mb' }));
 
@@ -127,9 +127,10 @@ const storage = multer.memoryStorage();
 const upload = multer({
   storage: storage,
   limits: {
-    fileSize: 500 * 1024 * 1024
+    fileSize: 500 * 1024 * 1024 // 500MB for videos
   },
   fileFilter: (req, file, cb) => {
+    // Allow images and videos
     const allowedTypes = [
       'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
       'video/mp4', 'video/mpeg', 'video/quicktime', 'video/x-msvideo', 'video/webm'
@@ -196,6 +197,7 @@ app.post('/api/login', [
   const { username, password, rememberMe } = req.body;
 
   try {
+    // Check if user exists in Firestore
     const userSnapshot = await db.collection('users')
       .where('username', '==', username)
       .limit(1)
@@ -209,8 +211,10 @@ app.post('/api/login', [
       userData = userSnapshot.docs[0].data();
     }
 
+    // If no user found, check hardcoded admin from .env
     if (!userData) {
       if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+        // Create admin user in database if not exists
         const adminCheck = await db.collection('users')
           .where('username', '==', ADMIN_USERNAME)
           .limit(1)
@@ -242,11 +246,13 @@ app.post('/api/login', [
       return res.status(401).json({ message: 'Invalid username or password' });
     }
 
+    // Verify password
     const isValidPassword = await bcrypt.compare(password, userData.password);
     if (!isValidPassword) {
       return res.status(401).json({ message: 'Invalid username or password' });
     }
 
+    // Generate token
     const token = jwt.sign(
       { username: userData.username, role: userData.role || 'admin' },
       JWT_SECRET,
@@ -294,14 +300,13 @@ app.get('/api/gallery', async (req, res) => {
   }
 });
 
-// POST upload image with face detection using Cloudinary
+// POST upload image
 app.post('/api/gallery', authenticateToken, upload.single('image'), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ message: 'No image file provided' });
   }
 
   try {
-    // استخدام Cloudinary مع كشف الوجوه
     const result = await new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
@@ -309,10 +314,7 @@ app.post('/api/gallery', authenticateToken, upload.single('image'), async (req, 
           transformation: [
             { width: 1920, crop: 'limit', quality: 'auto' }
           ],
-          public_id: `gallery_${uuidv4()}`,
-          // تفعيل كشف الوجوه في Cloudinary
-          faces: true,
-          face_coordinates: true
+          public_id: `gallery_${uuidv4()}`
         },
         (error, result) => {
           if (error) reject(error);
@@ -322,30 +324,11 @@ app.post('/api/gallery', authenticateToken, upload.single('image'), async (req, 
       uploadStream.end(req.file.buffer);
     });
 
-    // استخراج معلومات الوجوه من Cloudinary
-    const faceData = [];
-    if (result.faces && result.faces.length > 0) {
-      result.faces.forEach((face, index) => {
-        // توليد تضمين وهمي (128 قيمة) - هذا حل مؤقت
-        const embedding = Array.from({ length: 128 }, () => Math.random() * 2 - 1);
-        faceData.push({
-          embedding: embedding,
-          metadata: {
-            faceIndex: index,
-            coordinates: face,
-            confidence: 0.9
-          }
-        });
-      });
-    }
-
     const imageData = {
       url: result.secure_url,
       publicId: result.public_id,
       title: req.body.title || 'Image',
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
-      faces: faceData,
-      faceCount: faceData.length
+      createdAt: admin.firestore.FieldValue.serverTimestamp()
     };
 
     const docRef = await db.collection('gallery').add(imageData);
@@ -354,8 +337,7 @@ app.post('/api/gallery', authenticateToken, upload.single('image'), async (req, 
       id: docRef.id,
       url: result.secure_url,
       publicId: result.public_id,
-      title: imageData.title,
-      facesDetected: faceData.length
+      title: imageData.title
     });
   } catch (error) {
     console.error('Error uploading image:', error);
@@ -412,7 +394,7 @@ app.get('/api/videos', async (req, res) => {
   }
 });
 
-// POST upload video
+// POST upload video with extended timeout
 app.post('/api/video', authenticateToken, [
     body('url').isURL().withMessage('Valid URL is required'),
     body('publicId').optional().isString(),
@@ -469,165 +451,29 @@ app.delete('/api/video/:id', authenticateToken, async (req, res) => {
   }
 });
 
-// ==================== FACE SEARCH ROUTES (مبسط) ====================
-
-// POST - البحث بالوجه (نسخة مبسطة)
-app.post('/api/search-face', upload.single('image'), async (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ message: 'No image provided' });
-  }
-
-  try {
-    // رفع الصورة المؤقتة لكشف الوجوه
-    const result = await new Promise((resolve, reject) => {
-      const uploadStream = cloudinary.uploader.upload_stream(
-        {
-          folder: 'temp',
-          faces: true,
-          face_coordinates: true
-        },
-        (error, result) => {
-          if (error) reject(error);
-          else resolve(result);
-        }
-      );
-      uploadStream.end(req.file.buffer);
-    });
-
-    // حذف الصورة المؤقتة
-    await cloudinary.uploader.destroy(result.public_id);
-
-    // التحقق من وجود وجوه
-    if (!result.faces || result.faces.length === 0) {
-      return res.json({
-        success: false,
-        message: 'No faces detected'
-      });
-    }
-
-    // جلب الصور من Firestore
-    const snapshot = await db.collection('gallery')
-      .where('faceCount', '>', 0)
-      .get();
-
-    // محاكاة البحث عن وجوه مشابهة
-    const matches = [];
-    snapshot.forEach(doc => {
-      const data = doc.data();
-      // محاكاة تشابه عشوائي
-      const similarity = Math.random() * 0.5 + 0.4; // بين 0.4 و 0.9
-      if (similarity > 0.5) {
-        matches.push({
-          similarity: Math.round(similarity * 100) / 100,
-          image: {
-            id: doc.id,
-            url: data.url,
-            title: data.title || 'Image'
-          }
-        });
-      }
-    });
-
-    // ترتيب النتائج
-    matches.sort((a, b) => b.similarity - a.similarity);
-
-    res.json({
-      success: true,
-      facesDetected: result.faces.length,
-      matches: matches.slice(0, 10) // حد أقصى 10 نتائج
-    });
-
-  } catch (error) {
-    console.error('Search error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error during face search'
-    });
-  }
-});
-
-// POST - معالجة صورة واحدة (توليد التضمينات)
-app.post('/api/gallery/:id/faces', authenticateToken, async (req, res) => {
-  const { id } = req.params;
-  
-  try {
-    const doc = await db.collection('gallery').doc(id).get();
-    if (!doc.exists) {
-      return res.status(404).json({ message: 'Image not found' });
-    }
-
-    const imageData = doc.data();
-    if (!imageData.url) {
-      return res.status(400).json({ message: 'Image URL not found' });
-    }
-
-    // كشف الوجوه باستخدام Cloudinary
-    const result = await cloudinary.uploader.explicit(imageData.publicId, {
-      faces: true,
-      face_coordinates: true
-    });
-
-    const faceData = [];
-    if (result.faces && result.faces.length > 0) {
-      result.faces.forEach((face, index) => {
-        const embedding = Array.from({ length: 128 }, () => Math.random() * 2 - 1);
-        faceData.push({
-          embedding: embedding,
-          metadata: {
-            faceIndex: index,
-            coordinates: face
-          }
-        });
-      });
-    }
-
-    await db.collection('gallery').doc(id).update({
-      faces: faceData,
-      faceCount: faceData.length,
-      updatedAt: admin.firestore.FieldValue.serverTimestamp()
-    });
-
-    res.json({
-      success: true,
-      message: `Generated embeddings for ${faceData.length} faces`,
-      faceCount: faceData.length
-    });
-
-  } catch (error) {
-    console.error('Error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error generating face embeddings'
-    });
-  }
-});
-
-// GET - التحقق من حالة كشف الوجوه
-app.get('/api/face-status', async (req, res) => {
-  res.json({
-    status: 'ready',
-    message: 'Face detection is ready (using Cloudinary)'
-  });
-});
-
 // ==================== HTML ROUTES (Clean URLs) ====================
 
+// Serve index.html for root
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Serve login.html for /login
 app.get('/login', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
+// Serve dashboard.html for /dashboard
 app.get('/dashboard', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
+// Serve gallery.html for /gallery
 app.get('/gallery', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'gallery.html'));
 });
 
+// Serve videos.html for /videos
 app.get('/videos', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'videos.html'));
 });
@@ -654,6 +500,7 @@ app.use((req, res, next) => {
 app.use((err, req, res, next) => {
   console.error('Server Error:', err);
   
+  // Multer error handling
   if (err instanceof multer.MulterError) {
     if (err.code === 'FILE_TOO_LARGE') {
       return res.status(413).json({ message: 'File too large. Maximum size is 500MB' });
@@ -661,6 +508,7 @@ app.use((err, req, res, next) => {
     return res.status(400).json({ message: err.message });
   }
 
+  // JWT error handling
   if (err.name === 'JsonWebTokenError') {
     return res.status(403).json({ message: 'Invalid token' });
   }
@@ -669,6 +517,7 @@ app.use((err, req, res, next) => {
     return res.status(403).json({ message: 'Token expired' });
   }
 
+  // Default error
   res.status(500).json({ 
     message: 'Internal server error',
     error: process.env.NODE_ENV === 'development' ? err.message : undefined
@@ -700,9 +549,6 @@ app.listen(PORT, () => {
   console.log('=================================');
   console.log('📹 Video upload limit: 500MB');
   console.log('⏱️  Cloudinary timeout: 10 minutes');
-  console.log('=================================');
-  console.log('👤 Face Detection:');
-  console.log(`   Status: Using Cloudinary ✅`);
   console.log('=================================');
 });
 
