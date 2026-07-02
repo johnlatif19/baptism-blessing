@@ -4,11 +4,7 @@
   "builds": [
     {
       "src": "server.js",
-      "use": "@vercel/node",
-      "config": {
-        "maxDuration": 60,
-        "memory": 1024
-      }
+      "use": "@vercel/node"
     },
     {
       "src": "public/**",
